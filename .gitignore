@@ -9,6 +9,9 @@ coverage/
 .flutter-plugins
 .flutter-plugins-dependencies
 .metadata
+debug-apks/
+.apk-evidence/
+**/.kotlin/
 **/android/local.properties
 **/android/.gradle/
 **/android/captures/

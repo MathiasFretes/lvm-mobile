@@ -66,4 +66,4 @@ En esta máquina, Flutter 3.47.7 está en `C:\Desarrollo\flutter`. No forma part
 - `flutter analyze`: sin issues.
 - `flutter test` sobre las ocho carpetas: 11 tests, todos pasaron.
 - No hay emulador ni teléfono Android conectado. `flutter run` no se ejecutó. `flutter doctor` informa que faltan cmdline-tools y que el estado de las licencias del SDK es desconocido.
-- Las cuatro APK de depuración se generaron con `flutter build apk --debug --target-platform android-arm64`. Cada una pesa 73,6 MB y queda fuera de Git, en `debug-apks/`. No son un release ni se publican. Un intento anterior con todas las ABI compiló `lvm_public` y después se quedó sin espacio en disco.
+- Las cuatro APK de depuración arm64 se generaron con `flutter build apk --debug --target-platform android-arm64`. Cada una pesa 73,6 MB y queda fuera de Git, en `debug-apks/`. No son un release ni se publican. El comando sin `--target-platform` no se da por aprobado: falló por bloqueo de archivos nativos y por falta de espacio en disco.
