@@ -4,12 +4,17 @@ import 'package:lvm_design/lvm_design.dart';
 import 'package:lvm_models/lvm_models.dart';
 import 'package:lvm_persistence/lvm_persistence.dart';
 
+import 'worship_context_page.dart';
+import 'worship_context_preview.dart';
+
 void main() {
   runApp(const LvmWorshipApp());
 }
 
 class LvmWorshipApp extends StatefulWidget {
-  const LvmWorshipApp({super.key});
+  const LvmWorshipApp({super.key, this.contextController});
+
+  final WorshipContextController? contextController;
 
   @override
   State<LvmWorshipApp> createState() => _LvmWorshipAppState();
@@ -17,10 +22,23 @@ class LvmWorshipApp extends StatefulWidget {
 
 class _LvmWorshipAppState extends State<LvmWorshipApp> {
   final _theme = LvmThemeController();
+  late final WorshipContextController _context =
+      widget.contextController ??
+      WorshipContextController(
+        storage: DeviceWorshipContextStorage(),
+        pickFile: pickWorshipContextJson,
+      );
+
+  @override
+  void initState() {
+    super.initState();
+    _context.load();
+  }
 
   @override
   void dispose() {
     _theme.dispose();
+    if (widget.contextController == null) _context.dispose();
     super.dispose();
   }
 
@@ -48,14 +66,10 @@ class _LvmWorshipAppState extends State<LvmWorshipApp> {
                   applicationId: product.applicationId,
                 ),
               ),
-              const LvmDestination(
-                label: 'Canciones',
+              LvmDestination(
+                label: 'Repertorio',
                 icon: Icons.music_note_outlined,
-                page: LvmSectionPage(
-                  title: 'Canciones',
-                  message:
-                      'Esta sección todavía no abre canciones ni repertorios.',
-                ),
+                page: WorshipContextPage(controller: _context),
               ),
               LvmDestination(
                 label: 'Apariencia',
