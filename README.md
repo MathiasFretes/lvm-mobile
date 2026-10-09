@@ -64,8 +64,8 @@ Solo Android. Este repositorio no genera proyectos iOS, macOS, web ni escritorio
 En esta máquina, Flutter 3.47.7 está en `C:\Desarrollo\flutter`. No forma parte del `PATH` global.
 
 - `flutter analyze`: sin issues.
-- `flutter test` sobre las ocho carpetas: 11 tests, todos pasaron.
+- `flutter test` sobre las ocho carpetas pasó en el último workflow de `main`; la app pública incorpora pruebas de importación local, contrato y vista a 390 px.
 - `flutter run` en un teléfono o emulador todavía no forma parte de este gate. Las licencias Android ya están aceptadas en el entorno local.
-- Las cuatro APK de depuración arm64 se generaron con `flutter build apk --debug --target-platform android-arm64`. Cada una pesa 73,6 MB y queda fuera de Git, en `debug-apks/`. No son un release ni se publican. El comando sin `--target-platform` no se da por aprobado: falló por bloqueo de archivos nativos y por falta de espacio en disco.
+- Las cuatro APK de depuración arm64 se generaron con `flutter build apk --debug --target-platform android-arm64` durante M14A.1 y quedaron fuera de Git. No son un release. La app pública también compiló localmente después de incorporar `PublicContent 0.1`.
 
-CI analiza el workspace, ejecuta los tests de las ocho carpetas y construye una APK de depuración para cada aplicación. Las compilaciones de CI tampoco constituyen una release.
+CI analiza el workspace, ejecuta los tests de las ocho carpetas y construye una APK de depuración para cada aplicación. En `main` conserva durante siete días **solo la APK pública de congregación** y su SHA-256 como artefacto `lvm-public-debug-qa` para probarla en un teléfono. Las compilaciones de CI no constituyen una release. Las APK de Service y Worship no se distribuyen mientras sus productos sigan sin publicar.
