@@ -34,75 +34,115 @@ class _LvmEmblemPainter extends CustomPainter {
 
     canvas.drawCircle(center, radius, Paint()..color = LvmColors.navy);
 
-    final flame = Path()
-      ..moveTo(center.dx, center.dy - radius * 0.68)
-      ..quadraticBezierTo(
-        center.dx + radius * 0.34,
-        center.dy - radius * 0.28,
-        center.dx + radius * 0.08,
-        center.dy - radius * 0.08,
+    Offset at(double x, double y) =>
+        Offset(center.dx + radius * x, center.dy + radius * y);
+
+    canvas.drawPath(_flame(at), white);
+    _drawDove(canvas, at, radius, white);
+    canvas.drawPath(_page(at, left: true), white);
+    canvas.drawPath(_page(at, left: false), white);
+  }
+
+  Path _flame(Offset Function(double x, double y) at) {
+    return Path()
+      ..moveTo(at(0, -0.76).dx, at(0, -0.76).dy)
+      ..cubicTo(
+        at(0.20, -0.58).dx,
+        at(0.20, -0.58).dy,
+        at(0.28, -0.36).dx,
+        at(0.28, -0.36).dy,
+        at(0.08, -0.20).dx,
+        at(0.08, -0.20).dy,
       )
-      ..quadraticBezierTo(
-        center.dx,
-        center.dy - radius * 0.28,
-        center.dx - radius * 0.08,
-        center.dy - radius * 0.08,
+      ..cubicTo(
+        at(0.04, -0.34).dx,
+        at(0.04, -0.34).dy,
+        at(0.01, -0.28).dx,
+        at(0.01, -0.28).dy,
+        at(0, -0.14).dx,
+        at(0, -0.14).dy,
       )
-      ..quadraticBezierTo(
-        center.dx - radius * 0.34,
-        center.dy - radius * 0.28,
-        center.dx,
-        center.dy - radius * 0.68,
+      ..cubicTo(
+        at(-0.01, -0.28).dx,
+        at(-0.01, -0.28).dy,
+        at(-0.04, -0.34).dx,
+        at(-0.04, -0.34).dy,
+        at(-0.08, -0.20).dx,
+        at(-0.08, -0.20).dy,
+      )
+      ..cubicTo(
+        at(-0.28, -0.36).dx,
+        at(-0.28, -0.36).dy,
+        at(-0.20, -0.58).dx,
+        at(-0.20, -0.58).dy,
+        at(0, -0.76).dx,
+        at(0, -0.76).dy,
       )
       ..close();
-    canvas.drawPath(flame, white);
+  }
 
-    final dove = Path()
-      ..moveTo(center.dx - radius * 0.34, center.dy + radius * 0.02)
+  void _drawDove(
+    Canvas canvas,
+    Offset Function(double x, double y) at,
+    double radius,
+    Paint white,
+  ) {
+    final tail = Path()
+      ..moveTo(at(-0.74, 0.08).dx, at(-0.74, 0.08).dy)
+      ..lineTo(at(-0.40, 0.15).dx, at(-0.40, 0.15).dy)
+      ..lineTo(at(-0.72, 0.26).dx, at(-0.72, 0.26).dy)
+      ..close();
+    final wing = Path()
+      ..moveTo(at(-0.18, 0.14).dx, at(-0.18, 0.14).dy)
+      ..lineTo(at(0.02, -0.08).dx, at(0.02, -0.08).dy)
+      ..lineTo(at(0.28, 0.12).dx, at(0.28, 0.12).dy)
+      ..close();
+    final body = Path()
+      ..moveTo(at(-0.36, 0.12).dx, at(-0.36, 0.12).dy)
       ..quadraticBezierTo(
-        center.dx - radius * 0.02,
-        center.dy - radius * 0.24,
-        center.dx + radius * 0.30,
-        center.dy - radius * 0.02,
+        at(0.00, 0.28).dx,
+        at(0.00, 0.28).dy,
+        at(0.34, 0.16).dx,
+        at(0.34, 0.16).dy,
       )
       ..quadraticBezierTo(
-        center.dx + radius * 0.08,
-        center.dy + radius * 0.04,
-        center.dx - radius * 0.02,
-        center.dy + radius * 0.08,
-      )
-      ..quadraticBezierTo(
-        center.dx - radius * 0.22,
-        center.dy + radius * 0.20,
-        center.dx - radius * 0.40,
-        center.dy + radius * 0.06,
+        at(0.10, 0.08).dx,
+        at(0.10, 0.08).dy,
+        at(-0.36, 0.12).dx,
+        at(-0.36, 0.12).dy,
       )
       ..close();
-    canvas.drawPath(dove, white);
+    final beak = Path()
+      ..moveTo(at(0.48, 0.07).dx, at(0.48, 0.07).dy)
+      ..lineTo(at(0.66, 0.12).dx, at(0.66, 0.12).dy)
+      ..lineTo(at(0.48, 0.15).dx, at(0.48, 0.15).dy)
+      ..close();
+    canvas
+      ..drawPath(tail, white)
+      ..drawPath(body, white)
+      ..drawPath(wing, white)
+      ..drawCircle(at(0.42, 0.09), radius * 0.09, white)
+      ..drawPath(beak, white);
+  }
 
-    final page = Radius.circular(radius * 0.05);
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(
-        Rect.fromCenter(
-          center: Offset(center.dx - radius * 0.22, center.dy + radius * 0.42),
-          width: radius * 0.40,
-          height: radius * 0.22,
-        ),
-        page,
-      ),
-      white,
-    );
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(
-        Rect.fromCenter(
-          center: Offset(center.dx + radius * 0.22, center.dy + radius * 0.42),
-          width: radius * 0.40,
-          height: radius * 0.22,
-        ),
-        page,
-      ),
-      white,
-    );
+  Path _page(Offset Function(double x, double y) at, {required bool left}) {
+    final side = left ? -1.0 : 1.0;
+    return Path()
+      ..moveTo(at(0.045 * side, 0.36).dx, at(0.045 * side, 0.36).dy)
+      ..quadraticBezierTo(
+        at(0.36 * side, 0.20).dx,
+        at(0.36 * side, 0.20).dy,
+        at(0.68 * side, 0.28).dx,
+        at(0.68 * side, 0.28).dy,
+      )
+      ..lineTo(at(0.68 * side, 0.58).dx, at(0.68 * side, 0.58).dy)
+      ..quadraticBezierTo(
+        at(0.36 * side, 0.66).dx,
+        at(0.36 * side, 0.66).dy,
+        at(0.045 * side, 0.70).dx,
+        at(0.045 * side, 0.70).dy,
+      )
+      ..close();
   }
 
   @override

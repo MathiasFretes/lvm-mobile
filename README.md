@@ -65,5 +65,7 @@ En esta máquina, Flutter 3.47.7 está en `C:\Desarrollo\flutter`. No forma part
 
 - `flutter analyze`: sin issues.
 - `flutter test` sobre las ocho carpetas: 11 tests, todos pasaron.
-- No hay emulador ni teléfono Android conectado. `flutter run` no se ejecutó. `flutter doctor` informa que faltan cmdline-tools y que el estado de las licencias del SDK es desconocido.
-- Las cuatro APK de depuración arm64 se generaron con `flutter build apk --debug --target-platform android-arm64`. Cada una pesa 73,6 MB y queda fuera de Git, en `debug-apks/`. No son un release ni se publican. El comando sin `--target-platform` no se da por aprobado: falló por bloqueo de archivos nativos y por falta de espacio en disco.
+- No hay emulador ni teléfono Android conectado. `flutter run` no se ejecutó. Ese gate sigue pendiente: no hay capturas de navegación ni de tema claro/oscuro en un dispositivo. `flutter doctor` informa que faltan cmdline-tools y que el estado de las licencias del SDK es desconocido. El disco quedó con poco espacio libre; no se repitieron compilaciones locales.
+- Las cuatro APK de depuración arm64 locales se generaron antes con `flutter build apk --debug --target-platform android-arm64` y quedan fuera de Git, en `debug-apks/`. El comando sin `--target-platform` no se da por aprobado.
+- GitHub Actions genera las cuatro APK debug arm64 en `.github/workflows/debug-apk.yml` y las publica como artefactos del workflow, sin clave de release y sin subirlas a una tienda.
+- El emblema de pantalla y el icono Android usan la misma geometría: llama, paloma y libro abierto, en blanco sobre círculo `#0B2345`. La vista para comparar está en `docs/m14a1/emblem-256.png` y `docs/m14a1/emblem.svg`. En la app el emblema mide 112 px lógicos. Los repositorios de la suite no contienen el sello original de libro, paloma y llama; esta figura es una simplificación propia para la revisión, no un calco de un archivo fuente.
