@@ -1,17 +1,7 @@
-# lvm_public
+# La Voz Misionera Android
 
-LVM Android
+Esta primera función permite abrir un archivo `PublicContent 0.1` exportado por LVM Service y consultar eventos, prédicas y sedes sin conexión. El documento válido se conserva en el dispositivo para reabrirlo; importar otro lo reemplaza completo. Un archivo inválido no sobrescribe el anterior.
 
-## Getting Started
+El contenido es una **vista local**, no una publicación. Todavía no hay API pública, sincronización, cuenta de usuario ni CMS conectado. El botón «Quitar archivo local» borra solo esta copia del dispositivo.
 
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+El contrato fuente está en el repositorio LVM Service, `contracts/public-content-0.1.md`. La validación Flutter vive en `packages/lvm_models`; Service y Web Pública mantienen sus parsers TypeScript. Cualquier cambio de 0.1 debe verificarse en los tres consumidores antes de aceptarse.

@@ -4,12 +4,17 @@ import 'package:lvm_design/lvm_design.dart';
 import 'package:lvm_models/lvm_models.dart';
 import 'package:lvm_persistence/lvm_persistence.dart';
 
+import 'public_content.dart';
+import 'public_content_page.dart';
+
 void main() {
   runApp(const LvmPublicApp());
 }
 
 class LvmPublicApp extends StatefulWidget {
-  const LvmPublicApp({super.key});
+  const LvmPublicApp({super.key, this.contentController});
+
+  final PublicContentController? contentController;
 
   @override
   State<LvmPublicApp> createState() => _LvmPublicAppState();
@@ -17,10 +22,23 @@ class LvmPublicApp extends StatefulWidget {
 
 class _LvmPublicAppState extends State<LvmPublicApp> {
   final _theme = LvmThemeController();
+  late final PublicContentController _content =
+      widget.contentController ??
+      PublicContentController(
+        storage: DevicePublicContentStorage(),
+        pickFile: pickPublicContentJson,
+      );
+
+  @override
+  void initState() {
+    super.initState();
+    _content.load();
+  }
 
   @override
   void dispose() {
     _theme.dispose();
+    if (widget.contentController == null) _content.dispose();
     super.dispose();
   }
 
@@ -42,19 +60,33 @@ class _LvmPublicAppState extends State<LvmPublicApp> {
               LvmDestination(
                 label: 'Inicio',
                 icon: Icons.home_outlined,
-                page: LvmIdentityPage(
-                  productName: product.name,
-                  role: product.role,
-                  applicationId: product.applicationId,
+                page: PublicContentPage(
+                  controller: _content,
+                  section: PublicContentSection.home,
                 ),
               ),
-              const LvmDestination(
-                label: 'Visitas',
-                icon: Icons.groups_outlined,
-                page: LvmSectionPage(
-                  title: 'Visitas',
-                  message:
-                      'Esta sección todavía no consulta contenidos públicos.',
+              LvmDestination(
+                label: 'Eventos',
+                icon: Icons.event_outlined,
+                page: PublicContentPage(
+                  controller: _content,
+                  section: PublicContentSection.events,
+                ),
+              ),
+              LvmDestination(
+                label: 'Prédicas',
+                icon: Icons.menu_book_outlined,
+                page: PublicContentPage(
+                  controller: _content,
+                  section: PublicContentSection.sermons,
+                ),
+              ),
+              LvmDestination(
+                label: 'Sedes',
+                icon: Icons.place_outlined,
+                page: PublicContentPage(
+                  controller: _content,
+                  section: PublicContentSection.venues,
                 ),
               ),
               LvmDestination(
