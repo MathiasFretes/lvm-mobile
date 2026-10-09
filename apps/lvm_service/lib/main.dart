@@ -4,12 +4,17 @@ import 'package:lvm_design/lvm_design.dart';
 import 'package:lvm_models/lvm_models.dart';
 import 'package:lvm_persistence/lvm_persistence.dart';
 
+import 'service_preview.dart';
+import 'service_preview_page.dart';
+
 void main() {
   runApp(const LvmServiceApp());
 }
 
 class LvmServiceApp extends StatefulWidget {
-  const LvmServiceApp({super.key});
+  const LvmServiceApp({super.key, this.previewController});
+
+  final ServicePreviewController? previewController;
 
   @override
   State<LvmServiceApp> createState() => _LvmServiceAppState();
@@ -17,10 +22,23 @@ class LvmServiceApp extends StatefulWidget {
 
 class _LvmServiceAppState extends State<LvmServiceApp> {
   final _theme = LvmThemeController();
+  late final ServicePreviewController _preview =
+      widget.previewController ??
+      ServicePreviewController(
+        storage: DeviceServicePreviewStorage(),
+        pickFile: pickServiceJson,
+      );
+
+  @override
+  void initState() {
+    super.initState();
+    _preview.load();
+  }
 
   @override
   void dispose() {
     _theme.dispose();
+    if (widget.previewController == null) _preview.dispose();
     super.dispose();
   }
 
@@ -48,13 +66,10 @@ class _LvmServiceAppState extends State<LvmServiceApp> {
                   applicationId: product.applicationId,
                 ),
               ),
-              const LvmDestination(
+              LvmDestination(
                 label: 'Cultos',
                 icon: Icons.event_outlined,
-                page: LvmSectionPage(
-                  title: 'Cultos',
-                  message: 'Esta sección todavía no abre ni guarda cultos.',
-                ),
+                page: ServicePreviewPage(controller: _preview),
               ),
               LvmDestination(
                 label: 'Apariencia',

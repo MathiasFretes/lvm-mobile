@@ -18,7 +18,7 @@ SDK fijado: Flutter `3.47.7`, Dart `3.13.5`. El archivo [`.flutter-version`](.fl
 ## Paquetes
 
 - `packages/lvm_design`: Material 3, temas claro, oscuro y automático, emblema.
-- `packages/lvm_models`: identidad de cada producto.
+- `packages/lvm_models`: identidad y parsers estrictos de `PublicContent 0.1` y `Service 0.1`.
 - `packages/lvm_api`: límite futuro. No hay endpoints.
 - `packages/lvm_persistence`: límite futuro. El almacén incluido rechaza lecturas y escrituras.
 
@@ -69,3 +69,5 @@ En esta máquina, Flutter 3.47.7 está en `C:\Desarrollo\flutter`. No forma part
 - Las cuatro APK de depuración arm64 se generaron con `flutter build apk --debug --target-platform android-arm64` durante M14A.1 y quedaron fuera de Git. No son un release. La app pública también compiló localmente después de incorporar `PublicContent 0.1`.
 
 CI analiza el workspace, ejecuta los tests de las ocho carpetas y construye una APK de depuración para cada aplicación. En `main` conserva durante siete días **solo la APK pública de congregación** y su SHA-256 como artefacto `lvm-public-debug-qa` para probarla en un teléfono. Las compilaciones de CI no constituyen una release. Las APK de Service y Worship no se distribuyen mientras sus productos sigan sin publicar.
+
+`LVM Service > Cultos` puede abrir un archivo `Service 0.1` exportado desde LVM Service y mostrar su orden en el teléfono. Valida toda la estructura, conserva la última importación válida en el dispositivo y permite quitarla. Es una vista local de lectura: no edita cultos ni se conecta a la API. Un archivo inválido no reemplaza el culto ya guardado. La fixture de compatibilidad en `packages/lvm_models/test/fixtures/platform-service.json` proviene de `LVM Service/fixtures/platform-service.json`.
