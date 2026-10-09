@@ -1,0 +1,10 @@
+name: lvm_mobile_workspace
+publish_to: none
+environment:
+  sdk: ^3.13.5
+workspace:
+  - packages/lvm_ui
+  - apps/congregation
+  - apps/service
+  - apps/worship
+  - apps/presenter_remote
