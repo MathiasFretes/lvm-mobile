@@ -51,11 +51,7 @@ class ServicePreviewPage extends StatelessWidget {
           if (service != null) ...[
             Text(service.title, style: theme.textTheme.titleLarge),
             const SizedBox(height: 4),
-            Text(
-              '${MaterialLocalizations.of(context).formatMediumDate(localStart!)} '
-              '· ${TimeOfDay.fromDateTime(localStart).format(context)} '
-              '· ${service.setlistName}',
-            ),
+            Text('${_localDateTime(localStart!)} · ${service.setlistName}'),
             const SizedBox(height: 16),
             for (var index = 0; index < service.items.length; index++)
               Card(
@@ -83,3 +79,9 @@ String _kindLabel(String kind) => switch (kind) {
   'SERMON' => 'Predicación',
   _ => kind,
 };
+
+String _localDateTime(DateTime value) {
+  String two(int number) => number.toString().padLeft(2, '0');
+  return '${two(value.day)}/${two(value.month)}/${value.year} '
+      '${two(value.hour)}:${two(value.minute)}';
+}

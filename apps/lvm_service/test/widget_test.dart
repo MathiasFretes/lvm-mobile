@@ -73,6 +73,7 @@ void main() {
     await tester.tap(find.text('Abrir Service 0.1'));
     await tester.pumpAndSettle();
     expect(find.text('Culto General'), findsOneWidget);
+    expect(find.textContaining('18/10/2026'), findsOneWidget);
     expect(find.text('Bienvenida'), findsOneWidget);
   });
 
