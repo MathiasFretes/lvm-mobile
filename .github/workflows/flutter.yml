@@ -26,3 +26,17 @@ jobs:
       - run: flutter pub get
       - run: flutter build apk --debug
         working-directory: apps/${{ matrix.app }}
+      - name: Checksum public QA APK
+        if: matrix.app == 'lvm_public' && github.ref == 'refs/heads/main'
+        run: sha256sum app-debug.apk > SHA256SUMS
+        working-directory: apps/lvm_public/build/app/outputs/flutter-apk
+      - name: Keep public QA APK for device testing
+        if: matrix.app == 'lvm_public' && github.ref == 'refs/heads/main'
+        uses: actions/upload-artifact@v4
+        with:
+          name: lvm-public-debug-qa
+          path: |
+            apps/lvm_public/build/app/outputs/flutter-apk/app-debug.apk
+            apps/lvm_public/build/app/outputs/flutter-apk/SHA256SUMS
+          if-no-files-found: error
+          retention-days: 7
