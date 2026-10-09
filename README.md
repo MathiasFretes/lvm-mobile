@@ -1,36 +1,71 @@
-# LVM Mobile — Flutter foundation
+# LVM Mobile
 
-Cuatro aplicaciones Android independientes con una identidad visual compartida:
+Monorepo Flutter de las cuatro aplicaciones Android de La Voz Misionera. M14A.1 prepara la estructura, la identidad y la navegación inicial. No incluye autenticación, API real ni publicación.
 
-| Carpeta | Producto | Público previsto |
+SDK fijado: Flutter `3.47.7`, Dart `3.13.5`. El archivo [`.flutter-version`](.flutter-version) registra esa versión.
+
+## Aplicaciones
+
+| Carpeta | Nombre | applicationId |
 | --- | --- | --- |
-| `apps/congregation` | La Voz Misionera | Congregación |
-| `apps/service` | LVM Service | Líderes y equipos |
-| `apps/worship` | LVM Worship | Músicos |
-| `apps/presenter_remote` | LVM Presenter Remote | Multimedia |
+| `apps/lvm_public` | La Voz Misionera | `app.lavozmisionera.congregacion` |
+| `apps/lvm_service` | LVM Service | `app.lavozmisionera.service` |
+| `apps/lvm_worship` | LVM Worship | `app.lavozmisionera.worship` |
+| `apps/lvm_presenter_remote` | LVM Presenter Remote | `app.lavozmisionera.presenterremote` |
 
-`packages/lvm_ui` define los colores y componentes básicos. Sus valores navy `#1C2A39`, dorado `#C6A15B` y fondo `#F6F7F9` corresponden a la identidad clara que ya usan Service y Web Pública. El monograma actual es una implementación Flutter sencilla; antes de distribución se debe sustituir por el asset institucional definitivo.
+`app.lavozmisionera.worship` no reemplaza la app React Native existente (`com.lavozmisionera.app`).
 
-Esta fase crea la estructura y una pantalla honesta de desarrollo en cada app. **No hay login, conexión a API, control remoto ni APK de distribución**. La app móvil existente de Worship (Expo) permanece intacta; una eventual migración se decidirá por función.
+## Paquetes
 
-## Desarrollo
+- `packages/lvm_design`: Material 3, temas claro, oscuro y automático, emblema.
+- `packages/lvm_models`: identidad de cada producto.
+- `packages/lvm_api`: límite futuro. No hay endpoints.
+- `packages/lvm_persistence`: límite futuro. El almacén incluido rechaza lecturas y escrituras.
 
-Desde esta carpeta:
+## Comandos
+
+Desde la raíz del repositorio, con Flutter 3.47.7 en el `PATH`:
 
 ```powershell
-& 'C:\Desarrollo\flutter\bin\flutter.bat' pub get
-& 'C:\Desarrollo\flutter\bin\flutter.bat' analyze
-& 'C:\Desarrollo\flutter\bin\flutter.bat' test packages/lvm_ui/test
+flutter pub get
+flutter analyze
+flutter test apps/lvm_public
+flutter test apps/lvm_service
+flutter test apps/lvm_worship
+flutter test apps/lvm_presenter_remote
+flutter test packages/lvm_design
+flutter test packages/lvm_models
+flutter test packages/lvm_api
+flutter test packages/lvm_persistence
 ```
 
-Para ejecutar una app, entrar en su carpeta y usar `flutter run`. El repositorio usa [Pub workspaces](https://dart.dev/tools/pub/workspaces), con una sola resolución de dependencias en la raíz.
+Ejecutar una app en un dispositivo o emulador Android:
 
-## Antes de generar APK/AAB
+```powershell
+cd apps/lvm_public
+flutter run --debug
+```
 
-1. Aceptar las licencias del SDK Android en la máquina de desarrollo.
-2. Definir los cuatro `applicationId` definitivos; los `com.example.*` generados por Flutter son solo para desarrollo.
-3. Diseñar y verificar las funciones de cada app contra su producto dueño y sus contratos de API.
-4. Implementar M9 Auth/permisos antes de conectar Service o Worship a datos privados.
-5. Configurar firma de release y un canal de distribución. No publicar builds firmados con la clave de depuración.
+Repetir el directorio para `lvm_service`, `lvm_worship` y `lvm_presenter_remote`.
 
-La Web Pública actual sigue siendo una preview y Service/Worship no están autorizados para publicación. Por eso todavía no aparecen botones de descarga en esos sitios.
+APK de depuración. En esta máquina el comando general `flutter build apk --debug` no llegó a completarse: el disco se quedó sin espacio y Windows bloqueó archivos nativos temporales. La APK que sí se generó es arm64:
+
+```powershell
+cd apps/lvm_public
+flutter build apk --debug --target-platform android-arm64
+```
+
+El archivo queda en `build/app/outputs/flutter-apk/app-debug.apk` de esa aplicación. No subir ese artefacto a una tienda ni a un release.
+
+Solo Android. Este repositorio no genera proyectos iOS, macOS, web ni escritorio.
+
+## Verificación de M14A.1
+
+En esta máquina, Flutter 3.47.7 está en `C:\Desarrollo\flutter`. No forma parte del `PATH` global.
+
+- `flutter analyze`: sin issues.
+- `flutter test` sobre las ocho carpetas: 11 tests, todos pasaron.
+- `flutter run` en un teléfono o emulador todavía no forma parte de este gate. Las licencias Android ya están aceptadas en el entorno local.
+- Las cuatro APK de depuración arm64 se generaron con `flutter build apk --debug --target-platform android-arm64`. Cada una pesa 73,6 MB y queda fuera de Git, en `debug-apks/`. No son un release ni se publican. El comando sin `--target-platform` no se da por aprobado: falló por bloqueo de archivos nativos y por falta de espacio en disco.
+
+CI analiza el workspace, ejecuta los tests de las ocho carpetas y construye una APK de depuración para cada aplicación. Las compilaciones de CI tampoco constituyen una release.
