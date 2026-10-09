@@ -1,0 +1,16 @@
+name: lvm_mobile
+description: Monorepo Android de La Voz Misionera.
+publish_to: none
+
+environment:
+  sdk: ">=3.13.5 <3.14.0"
+
+workspace:
+  - apps/lvm_public
+  - apps/lvm_service
+  - apps/lvm_worship
+  - apps/lvm_presenter_remote
+  - packages/lvm_design
+  - packages/lvm_models
+  - packages/lvm_api
+  - packages/lvm_persistence
