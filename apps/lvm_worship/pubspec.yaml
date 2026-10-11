@@ -21,6 +21,7 @@ dependencies:
   lvm_persistence:
     path: ../../packages/lvm_persistence
   shared_preferences: 2.5.6
+  share_plus: 13.3.1
 
 dev_dependencies:
   flutter_test:

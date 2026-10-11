@@ -4,17 +4,19 @@ import 'package:lvm_design/lvm_design.dart';
 import 'package:lvm_models/lvm_models.dart';
 import 'package:lvm_persistence/lvm_persistence.dart';
 
-import 'worship_context_page.dart';
 import 'worship_context_preview.dart';
+import 'worship_plan_draft.dart';
+import 'worship_plan_page.dart';
 
 void main() {
   runApp(const LvmWorshipApp());
 }
 
 class LvmWorshipApp extends StatefulWidget {
-  const LvmWorshipApp({super.key, this.contextController});
+  const LvmWorshipApp({super.key, this.contextController, this.planController});
 
   final WorshipContextController? contextController;
+  final WorshipPlanController? planController;
 
   @override
   State<LvmWorshipApp> createState() => _LvmWorshipAppState();
@@ -28,6 +30,12 @@ class _LvmWorshipAppState extends State<LvmWorshipApp> {
         storage: DeviceWorshipContextStorage(),
         pickFile: pickWorshipContextJson,
       );
+  late final WorshipPlanController _plan =
+      widget.planController ??
+      WorshipPlanController(
+        storage: DeviceWorshipPlanStorage(),
+        sharePlan: shareWorshipPlan,
+      );
 
   @override
   void initState() {
@@ -39,6 +47,7 @@ class _LvmWorshipAppState extends State<LvmWorshipApp> {
   void dispose() {
     _theme.dispose();
     if (widget.contextController == null) _context.dispose();
+    if (widget.planController == null) _plan.dispose();
     super.dispose();
   }
 
@@ -69,7 +78,10 @@ class _LvmWorshipAppState extends State<LvmWorshipApp> {
               LvmDestination(
                 label: 'Repertorio',
                 icon: Icons.music_note_outlined,
-                page: WorshipContextPage(controller: _context),
+                page: WorshipPlanPage(
+                  contextController: _context,
+                  planController: _plan,
+                ),
               ),
               LvmDestination(
                 label: 'Apariencia',
