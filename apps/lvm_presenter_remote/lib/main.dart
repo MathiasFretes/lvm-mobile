@@ -6,6 +6,7 @@ import 'package:lvm_persistence/lvm_persistence.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
 import 'presenter_remote_connection.dart';
+import 'remote_dashboard.dart';
 
 void main() {
   runApp(const LvmPresenterRemoteApp());
@@ -41,29 +42,10 @@ class _LvmPresenterRemoteAppState extends State<LvmPresenterRemoteApp> {
           theme: LvmTheme.light(),
           darkTheme: LvmTheme.dark(),
           themeMode: _theme.themeMode,
-          home: LvmAppShell(
-            title: product.name,
-            destinations: [
-              LvmDestination(
-                label: 'Inicio',
-                icon: Icons.home_outlined,
-                page: LvmIdentityPage(
-                  productName: product.name,
-                  role: product.role,
-                  applicationId: product.applicationId,
-                ),
-              ),
-              LvmDestination(
-                label: 'Conexión',
-                icon: Icons.wifi_outlined,
-                page: PresenterRemoteConnectionPage(connection: _connection),
-              ),
-              LvmDestination(
-                label: 'Apariencia',
-                icon: Icons.contrast_outlined,
-                page: LvmAppearancePage(controller: _theme),
-              ),
-            ],
+          home: _PresenterRemoteShell(
+            productName: product.name,
+            connection: _connection,
+            theme: _theme,
           ),
         );
       },
@@ -71,10 +53,95 @@ class _LvmPresenterRemoteAppState extends State<LvmPresenterRemoteApp> {
   }
 }
 
+class _PresenterRemoteShell extends StatefulWidget {
+  const _PresenterRemoteShell({
+    required this.productName,
+    required this.connection,
+    required this.theme,
+  });
+
+  final String productName;
+  final PresenterRemoteConnection connection;
+  final LvmThemeController theme;
+
+  @override
+  State<_PresenterRemoteShell> createState() => _PresenterRemoteShellState();
+}
+
+class _PresenterRemoteShellState extends State<_PresenterRemoteShell> {
+  var _index = 0;
+
+  static const _titles = [
+    'Control',
+    'Culto',
+    'Biblia',
+    'Canciones',
+    'Conexión',
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    final pages = [
+      RemoteControlPage(
+        connection: widget.connection,
+        onOpenConnection: () => setState(() => _index = 4),
+      ),
+      ServiceOrderPage(
+        connection: widget.connection,
+        onOpenTeam: () =>
+            Navigator.of(context)
+                .push(MaterialPageRoute(builder: (_) => const TeamPage())),
+      ),
+      const BiblePage(),
+      const SongLibraryPage(),
+      PresenterRemoteConnectionPage(
+        connection: widget.connection,
+        theme: widget.theme,
+      ),
+    ];
+
+    return Scaffold(
+      appBar: AppBar(title: Text('${widget.productName} · ${_titles[_index]}')),
+      body: IndexedStack(index: _index, children: pages),
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: _index,
+        onDestinationSelected: (index) => setState(() => _index = index),
+        destinations: const [
+          NavigationDestination(
+            icon: Icon(Icons.tune_outlined),
+            label: 'Control',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.playlist_play_outlined),
+            label: 'Culto',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.menu_book_outlined),
+            label: 'Biblia',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.music_note_outlined),
+            label: 'Canciones',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.wifi_outlined),
+            label: 'Conexión',
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class PresenterRemoteConnectionPage extends StatefulWidget {
-  const PresenterRemoteConnectionPage({super.key, required this.connection});
+  const PresenterRemoteConnectionPage({
+    super.key,
+    required this.connection,
+    required this.theme,
+  });
 
   final PresenterRemoteConnection connection;
+  final LvmThemeController theme;
 
   @override
   State<PresenterRemoteConnectionPage> createState() =>
@@ -221,6 +288,21 @@ class _PresenterRemoteConnectionPageState
                 child: const Text('Desconectar'),
               ),
             ],
+            const SizedBox(height: 24),
+            ListTile(
+              leading: const Icon(Icons.contrast_outlined),
+              title: const Text('Apariencia'),
+              subtitle: const Text('Claro, oscuro o automático'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => Scaffold(
+                    appBar: AppBar(title: const Text('Apariencia')),
+                    body: LvmAppearancePage(controller: widget.theme),
+                  ),
+                ),
+              ),
+            ),
           ],
         );
       },
