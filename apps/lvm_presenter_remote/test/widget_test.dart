@@ -3,9 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:lvm_presenter_remote/main.dart';
 
 void main() {
-  testWidgets('shows presenter remote identity and its navigation', (
-    tester,
-  ) async {
+  testWidgets('shows presenter remote connection controls', (tester) async {
     await tester.pumpWidget(const LvmPresenterRemoteApp());
     expect(find.text('LVM Presenter Remote'), findsWidgets);
     expect(find.text('app.lavozmisionera.presenterremote'), findsOneWidget);
@@ -14,11 +12,8 @@ void main() {
 
     await tester.tap(find.widgetWithText(NavigationDestination, 'Conexión'));
     await tester.pumpAndSettle();
-    expect(
-      find.text(
-        'Esta sección todavía no busca LVM Presenter ni abre un puerto.',
-      ),
-      findsOneWidget,
-    );
+    expect(find.text('Conectar a Presenter'), findsOneWidget);
+    expect(find.byKey(const Key('connect-presenter')), findsOneWidget);
+    expect(find.text('Blackout'), findsOneWidget);
   });
 }
