@@ -13,6 +13,7 @@ void main() {
     await tester.tap(find.widgetWithText(NavigationDestination, 'Conexión'));
     await tester.pumpAndSettle();
     expect(find.text('Conectar a Presenter'), findsOneWidget);
+    expect(find.byKey(const Key('scan-presenter-qr')), findsOneWidget);
     expect(find.byKey(const Key('connect-presenter')), findsOneWidget);
     expect(find.text('Blackout'), findsOneWidget);
   });

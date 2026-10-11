@@ -19,6 +19,7 @@ dependencies:
     path: ../../packages/lvm_models
   lvm_persistence:
     path: ../../packages/lvm_persistence
+  mobile_scanner: ^7.4.2
 
 dev_dependencies:
   flutter_test:

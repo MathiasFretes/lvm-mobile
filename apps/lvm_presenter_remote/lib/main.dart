@@ -3,6 +3,7 @@ import 'package:lvm_api/lvm_api.dart';
 import 'package:lvm_design/lvm_design.dart';
 import 'package:lvm_models/lvm_models.dart';
 import 'package:lvm_persistence/lvm_persistence.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
 
 import 'presenter_remote_connection.dart';
 
@@ -101,6 +102,16 @@ class _PresenterRemoteConnectionPageState
     }
   }
 
+  Future<void> _scanQrCode() async {
+    final pairingLink = await Navigator.of(context).push<String>(
+      MaterialPageRoute(builder: (_) => const _PresenterRemoteQrScannerPage()),
+    );
+    if (!mounted || pairingLink == null) return;
+
+    _link.text = pairingLink;
+    _connect();
+  }
+
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
@@ -119,9 +130,16 @@ class _PresenterRemoteConnectionPageState
             ),
             const SizedBox(height: 8),
             const Text(
-              'Pegá el enlace que genera LVM Presenter. La conexión queda dentro de tu red local.',
+              'Escaneá el código QR que genera LVM Presenter o pegá su enlace. La conexión queda dentro de tu red local.',
             ),
             const SizedBox(height: 20),
+            OutlinedButton.icon(
+              key: const Key('scan-presenter-qr'),
+              onPressed: _scanQrCode,
+              icon: const Icon(Icons.qr_code_scanner),
+              label: const Text('Escanear código QR'),
+            ),
+            const SizedBox(height: 12),
             TextField(
               controller: _link,
               autocorrect: false,
@@ -206,6 +224,89 @@ class _PresenterRemoteConnectionPageState
           ],
         );
       },
+    );
+  }
+}
+
+class _PresenterRemoteQrScannerPage extends StatefulWidget {
+  const _PresenterRemoteQrScannerPage();
+
+  @override
+  State<_PresenterRemoteQrScannerPage> createState() =>
+      _PresenterRemoteQrScannerPageState();
+}
+
+class _PresenterRemoteQrScannerPageState
+    extends State<_PresenterRemoteQrScannerPage> {
+  final _scanner = MobileScannerController(formats: [BarcodeFormat.qrCode]);
+  var _handledResult = false;
+  var _cameraError = false;
+
+  Future<void> _onDetect(BarcodeCapture capture) async {
+    if (_handledResult) return;
+
+    String? value;
+    for (final barcode in capture.barcodes) {
+      final candidate = barcode.rawValue?.trim();
+      if (candidate != null && candidate.isNotEmpty) {
+        value = candidate;
+        break;
+      }
+    }
+    if (value == null) return;
+
+    _handledResult = true;
+    await _scanner.stop();
+    if (mounted) Navigator.of(context).pop(value);
+  }
+
+  @override
+  void dispose() {
+    _scanner.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Escanear QR de Presenter')),
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          MobileScanner(
+            controller: _scanner,
+            onDetect: _onDetect,
+            errorBuilder: (context, error) {
+              _cameraError = true;
+              return const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(24),
+                  child: Text(
+                    'No se pudo acceder a la cámara. Permití el acceso a cámara o pegá el enlace manualmente.',
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              );
+            },
+          ),
+          if (!_cameraError)
+            const Align(
+              alignment: Alignment.bottomCenter,
+              child: SafeArea(
+                minimum: EdgeInsets.all(24),
+                child: Card(
+                  child: Padding(
+                    padding: EdgeInsets.all(16),
+                    child: Text(
+                      'Enfocá el código QR mostrado en LVM Presenter.',
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
     );
   }
 }

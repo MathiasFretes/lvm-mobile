@@ -140,6 +140,14 @@ class PresenterRemoteConnection extends ChangeNotifier {
         case 'state.changed':
           snapshot = PresenterRemoteSnapshot.fromMessage(message);
           notifyListeners();
+        case 'command.applied':
+          final state = message['state'];
+          if (state is Map<String, dynamic>) {
+            snapshot = PresenterRemoteSnapshot.fromMessage(
+              state.cast<String, Object?>(),
+            );
+            notifyListeners();
+          }
         case 'pair.rejected':
           _fail('Presenter rechazó la solicitud de conexión.');
         case 'command.rejected':
