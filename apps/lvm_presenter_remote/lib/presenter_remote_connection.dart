@@ -92,7 +92,9 @@ class PresenterRemoteConnection extends ChangeNotifier {
         'device': {'id': _deviceId, 'name': _deviceName},
       });
     } on Object {
-      _fail('No se pudo conectar con LVM Presenter en esta red.');
+      _fail(
+        'No se pudo conectar con LVM Presenter. El QR puede haber vencido o pertenecer a otra red. En Presenter, activá Control remoto local y generá un QR nuevo.',
+      );
     }
   }
 
