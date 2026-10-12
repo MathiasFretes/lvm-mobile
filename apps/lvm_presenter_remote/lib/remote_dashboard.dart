@@ -238,7 +238,10 @@ class _ControlPad extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final hasSlide = (snapshot?.slideCount ?? 0) > 0;
+    final currentSlide = snapshot?.slideIndex;
+    final slideCount = snapshot?.slideCount ?? 0;
+    final canGoPrevious = currentSlide != null && currentSlide > 0;
+    final canGoNext = currentSlide != null && currentSlide < slideCount - 1;
     final canBlackout = snapshot?.isLive == true && !snapshot!.isCleared;
     final canRestore = snapshot?.isCleared == true;
     return Card(
@@ -250,7 +253,7 @@ class _ControlPad extends StatelessWidget {
               children: [
                 Expanded(
                   child: OutlinedButton.icon(
-                    onPressed: hasSlide
+                    onPressed: canGoPrevious
                         ? () => connection.sendCommand('previous')
                         : null,
                     icon: const Icon(Icons.chevron_left),
@@ -260,7 +263,7 @@ class _ControlPad extends StatelessWidget {
                 const SizedBox(width: 12),
                 Expanded(
                   child: FilledButton.icon(
-                    onPressed: hasSlide
+                    onPressed: canGoNext
                         ? () => connection.sendCommand('next')
                         : null,
                     icon: const Icon(Icons.chevron_right),
