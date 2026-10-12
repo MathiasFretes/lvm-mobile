@@ -188,6 +188,9 @@ class _PresenterRemoteConnectionPageState
         final isConnected =
             connection.status == PresenterRemoteConnectionStatus.connected;
         final snapshot = connection.snapshot;
+        final hasSlide = (snapshot?.slideCount ?? 0) > 0;
+        final canBlackout = snapshot?.isLive == true && !snapshot!.isCleared;
+        final canRestore = snapshot?.isCleared == true;
         return ListView(
           padding: const EdgeInsets.all(24),
           children: [
@@ -251,28 +254,28 @@ class _PresenterRemoteConnectionPageState
               runSpacing: 12,
               children: [
                 OutlinedButton.icon(
-                  onPressed: isConnected
+                  onPressed: isConnected && hasSlide
                       ? () => connection.sendCommand('previous')
                       : null,
                   icon: const Icon(Icons.skip_previous),
                   label: const Text('Anterior'),
                 ),
                 FilledButton.icon(
-                  onPressed: isConnected
+                  onPressed: isConnected && hasSlide
                       ? () => connection.sendCommand('next')
                       : null,
                   icon: const Icon(Icons.skip_next),
                   label: const Text('Siguiente'),
                 ),
                 OutlinedButton.icon(
-                  onPressed: isConnected
+                  onPressed: isConnected && canBlackout
                       ? () => connection.sendCommand('clear')
                       : null,
                   icon: const Icon(Icons.visibility_off_outlined),
                   label: const Text('Blackout'),
                 ),
                 OutlinedButton.icon(
-                  onPressed: isConnected
+                  onPressed: isConnected && canRestore
                       ? () => connection.sendCommand('restore')
                       : null,
                   icon: const Icon(Icons.visibility_outlined),

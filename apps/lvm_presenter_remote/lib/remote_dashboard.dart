@@ -84,7 +84,7 @@ class _RemoteControlPageState extends State<RemoteControlPage> {
             const SizedBox(height: 16),
             _SlidePosition(snapshot: snapshot),
             const SizedBox(height: 20),
-            _ControlPad(connection: connection),
+            _ControlPad(connection: connection, snapshot: snapshot),
             const SizedBox(height: 24),
             Text(
               'Ir a diapositiva',
@@ -231,12 +231,16 @@ class _SlidePosition extends StatelessWidget {
 }
 
 class _ControlPad extends StatelessWidget {
-  const _ControlPad({required this.connection});
+  const _ControlPad({required this.connection, required this.snapshot});
 
   final PresenterRemoteConnection connection;
+  final PresenterRemoteSnapshot? snapshot;
 
   @override
   Widget build(BuildContext context) {
+    final hasSlide = (snapshot?.slideCount ?? 0) > 0;
+    final canBlackout = snapshot?.isLive == true && !snapshot!.isCleared;
+    final canRestore = snapshot?.isCleared == true;
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -246,7 +250,9 @@ class _ControlPad extends StatelessWidget {
               children: [
                 Expanded(
                   child: OutlinedButton.icon(
-                    onPressed: () => connection.sendCommand('previous'),
+                    onPressed: hasSlide
+                        ? () => connection.sendCommand('previous')
+                        : null,
                     icon: const Icon(Icons.chevron_left),
                     label: const Text('Anterior'),
                   ),
@@ -254,7 +260,9 @@ class _ControlPad extends StatelessWidget {
                 const SizedBox(width: 12),
                 Expanded(
                   child: FilledButton.icon(
-                    onPressed: () => connection.sendCommand('next'),
+                    onPressed: hasSlide
+                        ? () => connection.sendCommand('next')
+                        : null,
                     icon: const Icon(Icons.chevron_right),
                     label: const Text('Siguiente'),
                   ),
@@ -266,7 +274,9 @@ class _ControlPad extends StatelessWidget {
               children: [
                 Expanded(
                   child: OutlinedButton.icon(
-                    onPressed: () => connection.sendCommand('clear'),
+                    onPressed: canBlackout
+                        ? () => connection.sendCommand('clear')
+                        : null,
                     icon: const Icon(Icons.visibility_off_outlined),
                     label: const Text('Blackout'),
                   ),
@@ -274,7 +284,9 @@ class _ControlPad extends StatelessWidget {
                 const SizedBox(width: 12),
                 Expanded(
                   child: OutlinedButton.icon(
-                    onPressed: () => connection.sendCommand('restore'),
+                    onPressed: canRestore
+                        ? () => connection.sendCommand('restore')
+                        : null,
                     icon: const Icon(Icons.visibility_outlined),
                     label: const Text('Restaurar salida'),
                   ),
