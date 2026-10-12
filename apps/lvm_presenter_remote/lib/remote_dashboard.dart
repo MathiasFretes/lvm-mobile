@@ -30,7 +30,10 @@ class _RemoteControlPageState extends State<RemoteControlPage> {
         final snapshot = connection.snapshot;
 
         if (!connected) {
-          return _RemoteEmptyState(onOpenConnection: widget.onOpenConnection);
+          return _RemoteEmptyState(
+            connection: connection,
+            onOpenConnection: widget.onOpenConnection,
+          );
         }
 
         return ListView(
@@ -100,8 +103,12 @@ class _RemoteControlPageState extends State<RemoteControlPage> {
 }
 
 class _RemoteEmptyState extends StatelessWidget {
-  const _RemoteEmptyState({required this.onOpenConnection});
+  const _RemoteEmptyState({
+    required this.connection,
+    required this.onOpenConnection,
+  });
 
+  final PresenterRemoteConnection connection;
   final VoidCallback onOpenConnection;
 
   @override
@@ -121,25 +128,50 @@ class _RemoteEmptyState extends StatelessWidget {
             ),
             const SizedBox(height: 20),
             Text(
-              'Sin conexión',
+              _titleFor(connection),
               style: Theme.of(context).textTheme.headlineSmall,
-            ),
-            const SizedBox(height: 8),
-            const Text(
-              'Escaneá el QR de LVM Presenter para controlar la presentación desde esta red local.',
               textAlign: TextAlign.center,
             ),
+            const SizedBox(height: 8),
+            Text(_detailFor(connection), textAlign: TextAlign.center),
             const SizedBox(height: 20),
             FilledButton.icon(
               onPressed: onOpenConnection,
               icon: const Icon(Icons.qr_code_scanner),
-              label: const Text('Conectar a Presenter'),
+              label: Text(_actionFor(connection)),
             ),
           ],
         ),
       ),
     );
   }
+
+  static String _titleFor(PresenterRemoteConnection connection) =>
+      switch (connection.status) {
+        PresenterRemoteConnectionStatus.connecting =>
+          'Conectando con Presenter',
+        PresenterRemoteConnectionStatus.waitingForApproval =>
+          'Esperando aprobación',
+        PresenterRemoteConnectionStatus.error => 'No se pudo conectar',
+        _ => 'Sin conexión',
+      };
+
+  static String _detailFor(PresenterRemoteConnection connection) =>
+      switch (connection.status) {
+        PresenterRemoteConnectionStatus.connecting =>
+          'Estamos abriendo la conexión segura con Presenter.',
+        PresenterRemoteConnectionStatus.waitingForApproval =>
+          'Aprobá esta solicitud en LVM Presenter para habilitar el control.',
+        PresenterRemoteConnectionStatus.error =>
+          connection.errorMessage ??
+              'Revisá el QR y que ambos equipos estén en la misma red local.',
+        _ => 'Escaneá el QR de LVM Presenter para controlar la presentación desde esta red local.',
+      };
+
+  static String _actionFor(PresenterRemoteConnection connection) =>
+      connection.status == PresenterRemoteConnectionStatus.error
+      ? 'Intentar nuevamente'
+      : 'Conectar a Presenter';
 }
 
 class _OutputPreview extends StatelessWidget {
@@ -349,6 +381,8 @@ class ServiceOrderPage extends StatelessWidget {
       listenable: connection,
       builder: (context, _) {
         final snapshot = connection.snapshot;
+        final connected =
+            connection.status == PresenterRemoteConnectionStatus.connected;
         final total = snapshot?.slideCount ?? 0;
         return ListView(
           padding: const EdgeInsets.all(20),
@@ -384,8 +418,12 @@ class ServiceOrderPage extends StatelessWidget {
                         ),
                         selected: index == snapshot?.slideIndex,
                         trailing: const Icon(Icons.play_arrow_outlined),
-                        onTap: () =>
-                            connection.sendCommand('goTo', slideIndex: index),
+                        onTap: connected
+                            ? () => connection.sendCommand(
+                                'goTo',
+                                slideIndex: index,
+                              )
+                            : null,
                       ),
                   ],
                 ),
