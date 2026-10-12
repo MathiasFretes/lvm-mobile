@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:lvm_presenter_remote/main.dart';
+import 'package:lvm_presenter_remote/presenter_remote_connection.dart';
+import 'package:lvm_presenter_remote/remote_dashboard.dart';
 
 void main() {
   testWidgets('shows the presenter remote control workspace', (tester) async {
@@ -23,4 +25,34 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Cantamos con fe'), findsOneWidget);
   });
+
+  testWidgets('tapping a Bible reference sends it to Presenter', (
+    tester,
+  ) async {
+    final connection = _RecordingConnection();
+    addTearDown(connection.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(body: BiblePage(connection: connection)),
+      ),
+    );
+    await tester.tap(find.text('Salmo 23:2'));
+    await tester.pump();
+
+    expect(connection.reference, '19.23.2');
+  });
+}
+
+class _RecordingConnection extends PresenterRemoteConnection {
+  String? reference;
+
+  _RecordingConnection() {
+    status = PresenterRemoteConnectionStatus.connected;
+  }
+
+  @override
+  void sendCommand(String command, {int? slideIndex, String? reference}) {
+    if (command == 'scripture') this.reference = reference;
+  }
 }

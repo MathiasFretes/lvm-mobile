@@ -98,7 +98,7 @@ class PresenterRemoteConnection extends ChangeNotifier {
     }
   }
 
-  void sendCommand(String command, {int? slideIndex}) {
+  void sendCommand(String command, {int? slideIndex, String? reference}) {
     if (status != PresenterRemoteConnectionStatus.connected ||
         _sessionToken == null) {
       return;
@@ -107,6 +107,7 @@ class PresenterRemoteConnection extends ChangeNotifier {
       'type': 'command.$command',
       'sessionToken': _sessionToken,
       'slideIndex': ?slideIndex,
+      'reference': ?reference,
     });
   }
 
@@ -152,7 +153,11 @@ class PresenterRemoteConnection extends ChangeNotifier {
             notifyListeners();
           }
         case 'pair.rejected':
-          _fail('Presenter rechazó la solicitud de conexión.');
+          _fail(
+            message['code'] == 'expired_pairing'
+                ? 'El QR venció. Generá uno nuevo en Presenter y volvé a escanearlo.'
+                : 'Presenter rechazó la solicitud de conexión.',
+          );
         case 'command.rejected':
           _fail('Presenter no pudo aplicar ese control.');
         case 'error':

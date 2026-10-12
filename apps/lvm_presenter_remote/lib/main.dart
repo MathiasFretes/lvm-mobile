@@ -92,7 +92,7 @@ class _PresenterRemoteShellState extends State<_PresenterRemoteShell> {
             Navigator.of(context)
                 .push(MaterialPageRoute(builder: (_) => const TeamPage())),
       ),
-      const BiblePage(),
+      BiblePage(connection: widget.connection),
       const SongLibraryPage(),
       PresenterRemoteConnectionPage(
         connection: widget.connection,

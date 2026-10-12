@@ -448,7 +448,9 @@ class ServiceOrderPage extends StatelessWidget {
 }
 
 class BiblePage extends StatefulWidget {
-  const BiblePage({super.key});
+  const BiblePage({super.key, required this.connection});
+
+  final PresenterRemoteConnection connection;
 
   @override
   State<BiblePage> createState() => _BiblePageState();
@@ -457,89 +459,256 @@ class BiblePage extends StatefulWidget {
 class _BiblePageState extends State<BiblePage> {
   var _listView = true;
   var _selected = 0;
-  static const _verses = [
-    'El Señor es mi pastor; nada me faltará.',
-    'En lugares de delicados pastos me hará descansar.',
-    'Junto a aguas de reposo me pastoreará.',
-    'Confortará mi alma; me guiará por sendas de justicia.',
+  static const _verseCount = 4;
+  static const _books = <String>[
+    'Génesis',
+    'Éxodo',
+    'Levítico',
+    'Números',
+    'Deuteronomio',
+    'Josué',
+    'Jueces',
+    'Rut',
+    '1 Samuel',
+    '2 Samuel',
+    '1 Reyes',
+    '2 Reyes',
+    '1 Crónicas',
+    '2 Crónicas',
+    'Esdras',
+    'Nehemías',
+    'Ester',
+    'Job',
+    'Salmos',
+    'Proverbios',
+    'Eclesiastés',
+    'Cantares',
+    'Isaías',
+    'Jeremías',
+    'Lamentaciones',
+    'Ezequiel',
+    'Daniel',
+    'Oseas',
+    'Joel',
+    'Amós',
+    'Abdías',
+    'Jonás',
+    'Miqueas',
+    'Nahúm',
+    'Habacuc',
+    'Sofonías',
+    'Hageo',
+    'Zacarías',
+    'Malaquías',
+    'Mateo',
+    'Marcos',
+    'Lucas',
+    'Juan',
+    'Hechos',
+    'Romanos',
+    '1 Corintios',
+    '2 Corintios',
+    'Gálatas',
+    'Efesios',
+    'Filipenses',
+    'Colosenses',
+    '1 Tesalonicenses',
+    '2 Tesalonicenses',
+    '1 Timoteo',
+    '2 Timoteo',
+    'Tito',
+    'Filemón',
+    'Hebreos',
+    'Santiago',
+    '1 Pedro',
+    '2 Pedro',
+    '1 Juan',
+    '2 Juan',
+    '3 Juan',
+    'Judas',
+    'Apocalipsis',
   ];
+  var _book = 19;
+  var _chapter = '23';
+  var _verse = '1';
+
+  void _presentReference() {
+    final chapter = int.tryParse(_chapter);
+    final verse = int.tryParse(_verse);
+    if (chapter == null || chapter < 1 || verse == null || verse < 1) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Ingresá un capítulo y versículo válidos.'),
+        ),
+      );
+      return;
+    }
+    widget.connection.sendCommand(
+      'scripture',
+      reference: '$_book.$chapter.$verse',
+    );
+  }
+
+  void _presentVerse(int index) {
+    setState(() => _selected = index);
+    widget.connection.sendCommand('scripture', reference: '19.23.${index + 1}');
+  }
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      padding: const EdgeInsets.all(20),
-      children: [
-        Row(
+    return ListenableBuilder(
+      listenable: widget.connection,
+      builder: (context, _) {
+        final connected =
+            widget.connection.status ==
+            PresenterRemoteConnectionStatus.connected;
+        return ListView(
+          padding: const EdgeInsets.all(20),
           children: [
-            Expanded(
-              child: Text(
-                'Biblia',
-                style: Theme.of(context).textTheme.headlineSmall,
-              ),
-            ),
-            IconButton(
-              tooltip: _listView ? 'Vista de cuadrícula' : 'Vista de lista',
-              onPressed: () => setState(() => _listView = !_listView),
-              icon: Icon(
-                _listView ? Icons.grid_view_outlined : Icons.view_list_outlined,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        const Card(
-          child: ListTile(
-            leading: Icon(Icons.menu_book_outlined),
-            title: Text('Salmo 23'),
-            subtitle: Text('Lectura local para la próxima integración bíblica'),
-          ),
-        ),
-        const SizedBox(height: 12),
-        if (_listView)
-          Card(
-            child: Column(
+            Row(
               children: [
-                for (var index = 0; index < _verses.length; index++)
-                  ListTile(
-                    selected: _selected == index,
-                    leading: Text('${index + 1}'),
-                    title: Text(_verses[index]),
-                    onTap: () => setState(() => _selected = index),
+                Expanded(
+                  child: Text(
+                    'Biblia',
+                    style: Theme.of(context).textTheme.headlineSmall,
                   ),
+                ),
+                IconButton(
+                  tooltip: _listView ? 'Vista de cuadrícula' : 'Vista de lista',
+                  onPressed: () => setState(() => _listView = !_listView),
+                  icon: Icon(
+                    _listView
+                        ? Icons.grid_view_outlined
+                        : Icons.view_list_outlined,
+                  ),
+                ),
               ],
             ),
-          )
-        else
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              childAspectRatio: 1.15,
-              crossAxisSpacing: 10,
-              mainAxisSpacing: 10,
-            ),
-            itemCount: _verses.length,
-            itemBuilder: (context, index) => InkWell(
-              onTap: () => setState(() => _selected = index),
-              child: Card(
-                color: _selected == index
-                    ? Theme.of(context).colorScheme.secondaryContainer
-                    : null,
-                child: Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: Text('${index + 1}. ${_verses[index]}'),
+            const SizedBox(height: 12),
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    DropdownButtonFormField<int>(
+                      initialValue: _book,
+                      decoration: const InputDecoration(labelText: 'Libro'),
+                      items: [
+                        for (var index = 0; index < _books.length; index++)
+                          DropdownMenuItem(
+                            value: index + 1,
+                            child: Text(_books[index]),
+                          ),
+                      ],
+                      onChanged: connected
+                          ? (value) => setState(() => _book = value ?? _book)
+                          : null,
+                    ),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextFormField(
+                            initialValue: _chapter,
+                            decoration: const InputDecoration(
+                              labelText: 'Capítulo',
+                            ),
+                            keyboardType: TextInputType.number,
+                            enabled: connected,
+                            onChanged: (value) => _chapter = value,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: TextFormField(
+                            initialValue: _verse,
+                            decoration: const InputDecoration(
+                              labelText: 'Versículo',
+                            ),
+                            keyboardType: TextInputType.number,
+                            enabled: connected,
+                            onChanged: (value) => _verse = value,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    FilledButton.icon(
+                      onPressed: connected ? _presentReference : null,
+                      icon: const Icon(Icons.cast),
+                      label: const Text('Presentar versículo'),
+                    ),
+                  ],
                 ),
               ),
             ),
-          ),
-        const SizedBox(height: 16),
-        const _MessageCard(
-          icon: Icons.info_outline,
-          title: 'Control bíblico en preparación',
-          detail: 'La selección ya es navegable en la app. Presentarla llegará con el contrato de Biblia de Presenter.',
-        ),
-      ],
+            const SizedBox(height: 12),
+            const Card(
+              child: ListTile(
+                leading: Icon(Icons.menu_book_outlined),
+                title: Text('Salmo 23'),
+                subtitle: Text(
+                  'Vista rápida · Presenter proyecta el texto de su Biblia activa',
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            if (_listView)
+              Card(
+                child: Column(
+                  children: [
+                    for (var index = 0; index < _verseCount; index++)
+                      ListTile(
+                        selected: _selected == index,
+                        leading: Text('${index + 1}'),
+                        title: Text('Salmo 23:${index + 1}'),
+                        trailing: Icon(
+                          connected
+                              ? Icons.play_arrow_outlined
+                              : Icons.link_off_outlined,
+                        ),
+                        onTap: connected ? () => _presentVerse(index) : null,
+                      ),
+                  ],
+                ),
+              )
+            else
+              GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  childAspectRatio: 1.15,
+                  crossAxisSpacing: 10,
+                  mainAxisSpacing: 10,
+                ),
+                itemCount: _verseCount,
+                itemBuilder: (context, index) => InkWell(
+                  onTap: connected ? () => _presentVerse(index) : null,
+                  child: Card(
+                    color: _selected == index
+                        ? Theme.of(context).colorScheme.secondaryContainer
+                        : null,
+                    child: Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Text('Salmo 23:${index + 1}'),
+                    ),
+                  ),
+                ),
+              ),
+            const SizedBox(height: 16),
+            _MessageCard(
+              icon: connected ? Icons.cast_connected : Icons.link_off_outlined,
+              title: connected
+                  ? 'Control bíblico activo'
+                  : 'Conectá LVM Presenter',
+              detail: connected
+                  ? 'Tocá un versículo para presentarlo inmediatamente en la salida activa.'
+                  : 'La Biblia se habilita después de emparejar y aprobar este dispositivo.',
+            ),
+          ],
+        );
+      },
     );
   }
 }
