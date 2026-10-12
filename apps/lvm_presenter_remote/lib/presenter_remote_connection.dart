@@ -77,7 +77,8 @@ class PresenterRemoteConnection extends ChangeNotifier {
       _messages = socket.listen(
         _receive,
         onDone: () {
-          if (status != PresenterRemoteConnectionStatus.disconnected) {
+          if (status != PresenterRemoteConnectionStatus.disconnected &&
+              status != PresenterRemoteConnectionStatus.error) {
             status = PresenterRemoteConnectionStatus.disconnected;
             notifyListeners();
           }
@@ -167,6 +168,7 @@ class PresenterRemoteConnection extends ChangeNotifier {
   void _fail(String message) {
     errorMessage = message;
     status = PresenterRemoteConnectionStatus.error;
+    _sessionToken = null;
     notifyListeners();
   }
 

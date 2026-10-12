@@ -322,7 +322,6 @@ class _PresenterRemoteQrScannerPageState
     extends State<_PresenterRemoteQrScannerPage> {
   final _scanner = MobileScannerController(formats: [BarcodeFormat.qrCode]);
   var _handledResult = false;
-  var _cameraError = false;
 
   Future<void> _onDetect(BarcodeCapture capture) async {
     if (_handledResult) return;
@@ -358,35 +357,31 @@ class _PresenterRemoteQrScannerPageState
           MobileScanner(
             controller: _scanner,
             onDetect: _onDetect,
-            errorBuilder: (context, error) {
-              _cameraError = true;
-              return const Center(
-                child: Padding(
-                  padding: EdgeInsets.all(24),
-                  child: Text(
-                    'No se pudo acceder a la cámara. Permití el acceso a cámara o pegá el enlace manualmente.',
-                    textAlign: TextAlign.center,
-                  ),
+            errorBuilder: (context, error) => const Center(
+              child: Padding(
+                padding: EdgeInsets.all(24),
+                child: Text(
+                  'No se pudo acceder a la cámara. Permití el acceso a cámara o pegá el enlace manualmente.',
+                  textAlign: TextAlign.center,
                 ),
-              );
-            },
+              ),
+            ),
           ),
-          if (!_cameraError)
-            const Align(
-              alignment: Alignment.bottomCenter,
-              child: SafeArea(
-                minimum: EdgeInsets.all(24),
-                child: Card(
-                  child: Padding(
-                    padding: EdgeInsets.all(16),
-                    child: Text(
-                      'Enfocá el código QR mostrado en LVM Presenter.',
-                      textAlign: TextAlign.center,
-                    ),
+          const Align(
+            alignment: Alignment.bottomCenter,
+            child: SafeArea(
+              minimum: EdgeInsets.all(24),
+              child: Card(
+                child: Padding(
+                  padding: EdgeInsets.all(16),
+                  child: Text(
+                    'Enfocá el código QR mostrado en LVM Presenter.',
+                    textAlign: TextAlign.center,
                   ),
                 ),
               ),
             ),
+          ),
         ],
       ),
     );

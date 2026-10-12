@@ -240,34 +240,46 @@ class _ControlPad extends StatelessWidget {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
-        child: Row(
+        child: Column(
           children: [
-            Expanded(
-              child: OutlinedButton.icon(
-                onPressed: () => connection.sendCommand('previous'),
-                icon: const Icon(Icons.chevron_left),
-                label: const Text('Anterior'),
-              ),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () => connection.sendCommand('previous'),
+                    icon: const Icon(Icons.chevron_left),
+                    label: const Text('Anterior'),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: FilledButton.icon(
+                    onPressed: () => connection.sendCommand('next'),
+                    icon: const Icon(Icons.chevron_right),
+                    label: const Text('Siguiente'),
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: FilledButton.icon(
-                onPressed: () => connection.sendCommand('next'),
-                icon: const Icon(Icons.chevron_right),
-                label: const Text('Siguiente'),
-              ),
-            ),
-            const SizedBox(width: 12),
-            IconButton.filledTonal(
-              tooltip: 'Blackout',
-              onPressed: () => connection.sendCommand('clear'),
-              icon: const Icon(Icons.visibility_off_outlined),
-            ),
-            const SizedBox(width: 6),
-            IconButton.filledTonal(
-              tooltip: 'Restaurar salida',
-              onPressed: () => connection.sendCommand('restore'),
-              icon: const Icon(Icons.visibility_outlined),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () => connection.sendCommand('clear'),
+                    icon: const Icon(Icons.visibility_off_outlined),
+                    label: const Text('Blackout'),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () => connection.sendCommand('restore'),
+                    icon: const Icon(Icons.visibility_outlined),
+                    label: const Text('Restaurar salida'),
+                  ),
+                ),
+              ],
             ),
           ],
         ),
