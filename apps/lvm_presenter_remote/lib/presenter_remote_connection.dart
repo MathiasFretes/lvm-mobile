@@ -79,6 +79,9 @@ class PresenterRemoteConnection extends ChangeNotifier {
         onDone: () {
           if (status != PresenterRemoteConnectionStatus.disconnected &&
               status != PresenterRemoteConnectionStatus.error) {
+            _socket = null;
+            _sessionToken = null;
+            snapshot = null;
             status = PresenterRemoteConnectionStatus.disconnected;
             notifyListeners();
           }
@@ -92,11 +95,13 @@ class PresenterRemoteConnection extends ChangeNotifier {
         'device': {'id': _deviceId, 'name': _deviceName},
       });
     } on Object {
-      _fail('No se pudo conectar con LVM Presenter en esta red.');
+      _fail(
+        'No se pudo conectar con LVM Presenter. El QR puede haber vencido o pertenecer a otra red. En Presenter, activá Control remoto local y generá un QR nuevo.',
+      );
     }
   }
 
-  void sendCommand(String command, {int? slideIndex}) {
+  void sendCommand(String command, {int? slideIndex, String? reference}) {
     if (status != PresenterRemoteConnectionStatus.connected ||
         _sessionToken == null) {
       return;
@@ -105,6 +110,7 @@ class PresenterRemoteConnection extends ChangeNotifier {
       'type': 'command.$command',
       'sessionToken': _sessionToken,
       'slideIndex': ?slideIndex,
+      'reference': ?reference,
     });
   }
 
@@ -150,7 +156,14 @@ class PresenterRemoteConnection extends ChangeNotifier {
             notifyListeners();
           }
         case 'pair.rejected':
-          _fail('Presenter rechazó la solicitud de conexión.');
+          final code = message['code'];
+          _fail(
+            code == 'expired_pairing'
+                ? 'El QR venció. Generá uno nuevo en Presenter y volvé a escanearlo.'
+                : code == 'invalid_pairing'
+                ? 'El QR ya se usó o dejó de ser válido. Generá uno nuevo en Presenter y volvé a escanearlo.'
+                : 'Presenter rechazó la solicitud de conexión.',
+          );
         case 'command.rejected':
           _fail('Presenter no pudo aplicar ese control.');
         case 'error':
@@ -169,6 +182,7 @@ class PresenterRemoteConnection extends ChangeNotifier {
     errorMessage = message;
     status = PresenterRemoteConnectionStatus.error;
     _sessionToken = null;
+    snapshot = null;
     notifyListeners();
   }
 
