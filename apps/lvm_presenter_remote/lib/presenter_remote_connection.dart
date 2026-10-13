@@ -79,6 +79,9 @@ class PresenterRemoteConnection extends ChangeNotifier {
         onDone: () {
           if (status != PresenterRemoteConnectionStatus.disconnected &&
               status != PresenterRemoteConnectionStatus.error) {
+            _socket = null;
+            _sessionToken = null;
+            snapshot = null;
             status = PresenterRemoteConnectionStatus.disconnected;
             notifyListeners();
           }
@@ -153,9 +156,12 @@ class PresenterRemoteConnection extends ChangeNotifier {
             notifyListeners();
           }
         case 'pair.rejected':
+          final code = message['code'];
           _fail(
-            message['code'] == 'expired_pairing'
+            code == 'expired_pairing'
                 ? 'El QR venció. Generá uno nuevo en Presenter y volvé a escanearlo.'
+                : code == 'invalid_pairing'
+                ? 'El QR ya se usó o dejó de ser válido. Generá uno nuevo en Presenter y volvé a escanearlo.'
                 : 'Presenter rechazó la solicitud de conexión.',
           );
         case 'command.rejected':
@@ -176,6 +182,7 @@ class PresenterRemoteConnection extends ChangeNotifier {
     errorMessage = message;
     status = PresenterRemoteConnectionStatus.error;
     _sessionToken = null;
+    snapshot = null;
     notifyListeners();
   }
 
