@@ -71,20 +71,28 @@ class _PresenterRemoteShell extends StatefulWidget {
 class _PresenterRemoteShellState extends State<_PresenterRemoteShell> {
   var _index = 0;
 
-  static const _titles = [
-    'Control',
-    'Culto',
-    'Biblia',
-    'Canciones',
-    'Conexión',
-  ];
+  static const _titles = ['Control', 'Culto', 'Biblia', 'Canciones', 'Más'];
+
+  void _openConnection() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => Scaffold(
+          appBar: AppBar(title: const Text('Conexión')),
+          body: PresenterRemoteConnectionPage(
+            connection: widget.connection,
+            theme: widget.theme,
+          ),
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     final pages = [
       RemoteControlPage(
         connection: widget.connection,
-        onOpenConnection: () => setState(() => _index = 4),
+        onOpenConnection: _openConnection,
       ),
       ServiceOrderPage(
         connection: widget.connection,
@@ -94,14 +102,20 @@ class _PresenterRemoteShellState extends State<_PresenterRemoteShell> {
       ),
       BiblePage(connection: widget.connection),
       const SongLibraryPage(),
-      PresenterRemoteConnectionPage(
-        connection: widget.connection,
+      _PresenterRemoteMorePage(
         theme: widget.theme,
+        onOpenConnection: _openConnection,
       ),
     ];
 
     return Scaffold(
-      appBar: AppBar(title: Text('${widget.productName} · ${_titles[_index]}')),
+      appBar: AppBar(
+        leading: const Padding(
+          padding: EdgeInsets.all(8),
+          child: LvmEmblem(size: 36),
+        ),
+        title: Text('LVM · ${_titles[_index]}'),
+      ),
       body: IndexedStack(index: _index, children: pages),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _index,
@@ -123,14 +137,67 @@ class _PresenterRemoteShellState extends State<_PresenterRemoteShell> {
             icon: Icon(Icons.music_note_outlined),
             label: 'Canciones',
           ),
-          NavigationDestination(
-            icon: Icon(Icons.wifi_outlined),
-            label: 'Conexión',
-          ),
+          NavigationDestination(icon: Icon(Icons.more_horiz), label: 'Más'),
         ],
       ),
     );
   }
+}
+
+class _PresenterRemoteMorePage extends StatelessWidget {
+  const _PresenterRemoteMorePage({
+    required this.theme,
+    required this.onOpenConnection,
+  });
+
+  final LvmThemeController theme;
+  final VoidCallback onOpenConnection;
+
+  @override
+  Widget build(BuildContext context) => ListView(
+    padding: const EdgeInsets.all(20),
+    children: [
+      Text('Más', style: Theme.of(context).textTheme.headlineSmall),
+      const SizedBox(height: 16),
+      Card(
+        child: Column(
+          children: [
+            ListTile(
+              leading: const Icon(Icons.wifi_outlined),
+              title: const Text('Conexión'),
+              subtitle: const Text('QR, estado y controles de la red local'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: onOpenConnection,
+            ),
+            const Divider(height: 1),
+            ListTile(
+              leading: const Icon(Icons.groups_outlined),
+              title: const Text('Equipo'),
+              subtitle: const Text('Integrantes e instrumentos'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => Navigator.of(context)
+                  .push(MaterialPageRoute(builder: (_) => const TeamPage())),
+            ),
+            const Divider(height: 1),
+            ListTile(
+              leading: const Icon(Icons.contrast_outlined),
+              title: const Text('Apariencia'),
+              subtitle: const Text('Claro, oscuro o automático'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => Scaffold(
+                    appBar: AppBar(title: const Text('Apariencia')),
+                    body: LvmAppearancePage(controller: theme),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    ],
+  );
 }
 
 class PresenterRemoteConnectionPage extends StatefulWidget {

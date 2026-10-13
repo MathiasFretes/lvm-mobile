@@ -383,7 +383,7 @@ class ServiceOrderPage extends StatelessWidget {
         final snapshot = connection.snapshot;
         final connected =
             connection.status == PresenterRemoteConnectionStatus.connected;
-        final total = snapshot?.slideCount ?? 0;
+        final items = snapshot?.items ?? const <PresenterRemoteItem>[];
         return ListView(
           padding: const EdgeInsets.all(20),
           children: [
@@ -393,41 +393,69 @@ class ServiceOrderPage extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              snapshot?.showTitle ??
-                  'Conectate para recibir la presentación activa.',
+              snapshot?.projectTitle ??
+                  'Conectate para recibir el orden del culto.',
             ),
             const SizedBox(height: 16),
-            if (total == 0)
+            if (items.isEmpty)
               const _MessageCard(
                 icon: Icons.playlist_remove,
-                title: 'Sin presentación activa',
-                detail: 'Cuando Presenter cargue un culto, aquí aparecerán sus diapositivas para navegar.',
+                title: 'Sin culto cargado',
+                detail: 'Cuando Presenter abra un proyecto, aquí aparecerán sus elementos y diapositivas.',
               )
             else
-              Card(
-                child: Column(
-                  children: [
-                    for (var index = 0; index < total; index++)
+              for (final item in items) ...[
+                Card(
+                  child: Column(
+                    children: [
                       ListTile(
-                        leading: CircleAvatar(child: Text('${index + 1}')),
-                        title: Text('Diapositiva ${index + 1}'),
+                        leading: Icon(_iconForItem(item.kind)),
+                        title: Text(item.title),
                         subtitle: Text(
-                          index == snapshot?.slideIndex
-                              ? 'En pantalla'
-                              : 'Tocar para presentar',
+                          item.index == snapshot?.itemIndex
+                              ? 'En pantalla · ${_nameForItem(item.kind)}'
+                              : _nameForItem(item.kind),
                         ),
-                        selected: index == snapshot?.slideIndex,
-                        trailing: const Icon(Icons.play_arrow_outlined),
-                        onTap: connected
+                        selected: item.index == snapshot?.itemIndex,
+                        trailing: item.slides.isNotEmpty
+                            ? Text('${item.slides.length}')
+                            : null,
+                        onTap: connected && item.slides.isNotEmpty
                             ? () => connection.sendCommand(
-                                'goTo',
-                                slideIndex: index,
+                                'goToItem',
+                                itemIndex: item.index,
                               )
                             : null,
                       ),
-                  ],
+                      if (item.slides.isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                          child: Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: [
+                              for (final slide in item.slides)
+                                ChoiceChip(
+                                  label: Text(slide.label),
+                                  selected:
+                                      item.index == snapshot?.itemIndex &&
+                                      slide.index == snapshot?.slideIndex,
+                                  onSelected: connected
+                                      ? (_) => connection.sendCommand(
+                                          'goToItem',
+                                          itemIndex: item.index,
+                                          slideIndex: slide.index,
+                                        )
+                                      : null,
+                                ),
+                            ],
+                          ),
+                        ),
+                    ],
+                  ),
                 ),
-              ),
+                const SizedBox(height: 8),
+              ],
             const SizedBox(height: 20),
             ListTile(
               shape: RoundedRectangleBorder(
@@ -445,6 +473,22 @@ class ServiceOrderPage extends StatelessWidget {
       },
     );
   }
+
+  static String _nameForItem(String kind) => switch (kind) {
+    'song' => 'Canción',
+    'scripture' => 'Biblia',
+    'sermon' => 'Prédica',
+    'announcement' => 'Anuncio',
+    _ => 'Presentación',
+  };
+
+  static IconData _iconForItem(String kind) => switch (kind) {
+    'song' => Icons.music_note_outlined,
+    'scripture' => Icons.menu_book_outlined,
+    'sermon' => Icons.record_voice_over_outlined,
+    'announcement' => Icons.campaign_outlined,
+    _ => Icons.slideshow_outlined,
+  };
 }
 
 class BiblePage extends StatefulWidget {

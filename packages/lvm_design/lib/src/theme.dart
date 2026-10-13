@@ -24,32 +24,34 @@ class LvmThemeController extends ChangeNotifier {
 
 abstract final class LvmTheme {
   static ThemeData light() {
-    final scheme = ColorScheme.fromSeed(
-      seedColor: LvmColors.navy,
-      brightness: Brightness.light,
-    ).copyWith(
-      primary: LvmColors.navy,
-      onPrimary: Colors.white,
-      secondary: LvmColors.gold,
-      onSecondary: LvmColors.navy,
-      surface: LvmColors.neutral,
-      onSurface: LvmColors.navy,
-    );
+    final scheme =
+        ColorScheme.fromSeed(
+          seedColor: LvmColors.navy,
+          brightness: Brightness.light,
+        ).copyWith(
+          primary: LvmColors.navy,
+          onPrimary: Colors.white,
+          secondary: LvmColors.gold,
+          onSecondary: LvmColors.navy,
+          surface: LvmColors.neutral,
+          onSurface: LvmColors.navy,
+        );
     return _theme(scheme, LvmColors.neutral, Colors.white);
   }
 
   static ThemeData dark() {
-    final scheme = ColorScheme.fromSeed(
-      seedColor: LvmColors.navy,
-      brightness: Brightness.dark,
-    ).copyWith(
-      primary: LvmColors.gold,
-      onPrimary: LvmColors.navy,
-      secondary: LvmColors.gold,
-      onSecondary: LvmColors.navy,
-      surface: LvmColors.navy,
-      onSurface: LvmColors.neutral,
-    );
+    final scheme =
+        ColorScheme.fromSeed(
+          seedColor: LvmColors.navy,
+          brightness: Brightness.dark,
+        ).copyWith(
+          primary: LvmColors.gold,
+          onPrimary: LvmColors.navy,
+          secondary: LvmColors.gold,
+          onSecondary: LvmColors.navy,
+          surface: LvmColors.navy,
+          onSurface: LvmColors.neutral,
+        );
     return _theme(scheme, LvmColors.navyDeep, LvmColors.navy);
   }
 
@@ -60,8 +62,40 @@ abstract final class LvmTheme {
   ) {
     return ThemeData(
       useMaterial3: true,
+      fontFamily: 'Poppins',
       colorScheme: scheme,
       scaffoldBackgroundColor: scaffold,
+      cardTheme: CardThemeData(
+        color: navigation,
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(color: scheme.outlineVariant),
+        ),
+      ),
+      filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          minimumSize: const Size(48, 48),
+        ),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          minimumSize: const Size(48, 48),
+        ),
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 12,
+        ),
+      ),
       appBarTheme: const AppBarTheme(
         backgroundColor: LvmColors.navy,
         foregroundColor: Colors.white,
