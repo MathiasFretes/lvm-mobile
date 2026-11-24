@@ -1,3 +1,4 @@
+export 'src/brand.dart';
 export 'src/colors.dart';
 export 'src/emblem.dart';
 export 'src/shell.dart';

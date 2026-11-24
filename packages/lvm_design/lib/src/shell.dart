@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'emblem.dart';
+import 'brand.dart';
 import 'theme.dart';
 
 class LvmDestination {
@@ -35,7 +36,10 @@ class _LvmAppShellState extends State<LvmAppShell> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(widget.title)),
+      appBar: AppBar(
+        toolbarHeight: 56.0 * MediaQuery.textScalerOf(context).scale(1).clamp(1.0, 2.0),
+        title: LvmBrandIdentity(product: widget.title),
+      ),
       body: IndexedStack(
         index: _index,
         children: [for (final item in widget.destinations) item.page],
