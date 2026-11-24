@@ -13,6 +13,42 @@ enum PresenterRemoteConnectionStatus {
   error,
 }
 
+class PresenterRemoteSlide {
+  const PresenterRemoteSlide({required this.index, required this.label});
+  final int index;
+  final String label;
+
+  factory PresenterRemoteSlide.fromJson(Map<String, dynamic> value) =>
+      PresenterRemoteSlide(
+        index: value['index'] as int? ?? 0,
+        label: value['label'] as String? ?? 'Diapositiva',
+      );
+}
+
+class PresenterRemoteItem {
+  const PresenterRemoteItem({
+    required this.index,
+    required this.title,
+    required this.kind,
+    required this.slides,
+  });
+  final int index;
+  final String title;
+  final String kind;
+  final List<PresenterRemoteSlide> slides;
+
+  factory PresenterRemoteItem.fromJson(Map<String, dynamic> value) =>
+      PresenterRemoteItem(
+        index: value['index'] as int? ?? 0,
+        title: value['title'] as String? ?? 'Elemento',
+        kind: value['kind'] as String? ?? 'show',
+        slides: (value['slides'] as List<dynamic>? ?? const [])
+            .whereType<Map<String, dynamic>>()
+            .map(PresenterRemoteSlide.fromJson)
+            .toList(growable: false),
+      );
+}
+
 class PresenterRemoteSnapshot {
   const PresenterRemoteSnapshot({
     required this.showTitle,
@@ -21,6 +57,8 @@ class PresenterRemoteSnapshot {
     required this.slideCount,
     required this.isLive,
     required this.isCleared,
+    this.projectTitle,
+    this.items = const [],
   });
 
   final String? showTitle;
@@ -29,11 +67,14 @@ class PresenterRemoteSnapshot {
   final int? slideCount;
   final bool isLive;
   final bool isCleared;
+  final String? projectTitle;
+  final List<PresenterRemoteItem> items;
 
   factory PresenterRemoteSnapshot.fromMessage(Map<String, Object?> value) {
     final show = value['show'] as Map<String, Object?>?;
     final current = value['current'] as Map<String, Object?>?;
     final output = value['output'] as Map<String, Object?>? ?? const {};
+    final project = value['project'] as Map<String, Object?>?;
     return PresenterRemoteSnapshot(
       showTitle: show?['title'] as String?,
       itemIndex: current?['itemIndex'] as int?,
@@ -41,6 +82,11 @@ class PresenterRemoteSnapshot {
       slideCount: current?['slideCount'] as int?,
       isLive: output['isLive'] as bool? ?? false,
       isCleared: output['isCleared'] as bool? ?? false,
+      projectTitle: project?['title'] as String?,
+      items: (value['items'] as List<dynamic>? ?? const [])
+          .whereType<Map<String, dynamic>>()
+          .map(PresenterRemoteItem.fromJson)
+          .toList(growable: false),
     );
   }
 }
@@ -59,6 +105,8 @@ class PresenterRemoteConnection extends ChangeNotifier {
   WebSocket? _socket;
   StreamSubscription<dynamic>? _messages;
   String? _sessionToken;
+  int _generation = 0;
+  bool _disposed = false;
 
   PresenterRemoteConnectionStatus status =
       PresenterRemoteConnectionStatus.disconnected;
@@ -66,18 +114,28 @@ class PresenterRemoteConnection extends ChangeNotifier {
   String? errorMessage;
 
   Future<void> connect(PresenterRemotePairingLink link) async {
-    await disconnect(notify: false);
+    if (_disposed) return;
+    final generation = ++_generation;
+    await _closeCurrent();
+    if (_disposed || generation != _generation) return;
     status = PresenterRemoteConnectionStatus.connecting;
     errorMessage = null;
     notifyListeners();
     try {
       final socket = await WebSocket.connect(link.socketUri.toString())
           .timeout(const Duration(seconds: 8));
+      if (_disposed || generation != _generation) {
+        await socket.close();
+        return;
+      }
       _socket = socket;
       _messages = socket.listen(
-        _receive,
+        (raw) {
+          if (!_disposed && generation == _generation) _receive(raw);
+        },
         onDone: () {
-          if (status != PresenterRemoteConnectionStatus.disconnected &&
+          if (!_disposed && generation == _generation &&
+              status != PresenterRemoteConnectionStatus.disconnected &&
               status != PresenterRemoteConnectionStatus.error) {
             _socket = null;
             _sessionToken = null;
@@ -86,7 +144,11 @@ class PresenterRemoteConnection extends ChangeNotifier {
             notifyListeners();
           }
         },
-        onError: (Object error) => _fail('La conexión se interrumpió.'),
+        onError: (Object error) {
+          if (!_disposed && generation == _generation) {
+            _fail('La conexión se interrumpió.');
+          }
+        },
       );
       _send({
         'type': 'pair.request',
@@ -95,13 +157,19 @@ class PresenterRemoteConnection extends ChangeNotifier {
         'device': {'id': _deviceId, 'name': _deviceName},
       });
     } on Object {
+      if (_disposed || generation != _generation) return;
       _fail(
         'No se pudo conectar con LVM Presenter. El QR puede haber vencido o pertenecer a otra red. En Presenter, activá Control remoto local y generá un QR nuevo.',
       );
     }
   }
 
-  void sendCommand(String command, {int? slideIndex, String? reference}) {
+  void sendCommand(
+    String command, {
+    int? slideIndex,
+    int? itemIndex,
+    String? reference,
+  }) {
     if (status != PresenterRemoteConnectionStatus.connected ||
         _sessionToken == null) {
       return;
@@ -110,20 +178,30 @@ class PresenterRemoteConnection extends ChangeNotifier {
       'type': 'command.$command',
       'sessionToken': _sessionToken,
       'slideIndex': ?slideIndex,
+      'itemIndex': ?itemIndex,
       'reference': ?reference,
     });
   }
 
-  Future<void> disconnect({bool notify = true}) async {
-    await _messages?.cancel();
+  Future<void> _closeCurrent() async {
+    // Detach synchronously: an older cleanup must never close a newer socket.
+    final messages = _messages;
+    final socket = _socket;
     _messages = null;
-    await _socket?.close();
     _socket = null;
     _sessionToken = null;
     snapshot = null;
+    await messages?.cancel();
+    await socket?.close();
+  }
+
+  Future<void> disconnect({bool notify = true}) async {
+    ++_generation;
+    final closing = _closeCurrent();
     status = PresenterRemoteConnectionStatus.disconnected;
     errorMessage = null;
-    if (notify) notifyListeners();
+    if (notify && !_disposed) notifyListeners();
+    await closing;
   }
 
   void _receive(dynamic raw) {
@@ -188,7 +266,9 @@ class PresenterRemoteConnection extends ChangeNotifier {
 
   @override
   void dispose() {
-    unawaited(disconnect(notify: false));
+    _disposed = true;
+    ++_generation;
+    unawaited(_closeCurrent());
     super.dispose();
   }
 }
