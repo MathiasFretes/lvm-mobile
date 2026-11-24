@@ -48,6 +48,24 @@ void main() {
     expect(connection.reference, '19.23.2');
   });
 
+  testWidgets('older Presenter snapshot keeps active presentation and legacy slide controls', (tester) async {
+    final connection = _RecordingConnection();
+    addTearDown(connection.dispose);
+    connection.snapshot = PresenterRemoteSnapshot.fromMessage({
+      'show': {'id': 'legacy-song', 'title': 'Canción activa'},
+      'current': {'itemIndex': 0, 'slideIndex': 0, 'slideCount': 2},
+      'output': {'isLive': true, 'isCleared': false},
+    });
+    await tester.pumpWidget(MaterialApp(home: Scaffold(body: ServiceOrderPage(connection: connection, onOpenTeam: () {}))));
+    expect(find.text('Sin culto cargado'), findsNothing);
+    expect(find.text('Vista simplificada'), findsOneWidget);
+    expect(find.text('Canción activa'), findsOneWidget);
+    await tester.tap(find.widgetWithText(ChoiceChip, '2'));
+    expect(connection.lastCommand, 'goTo');
+    expect(connection.slideIndex, 1);
+    expect(connection.itemIndex, isNull);
+  });
+
   testWidgets('culto lists real items and selects an item slide', (
     tester,
   ) async {

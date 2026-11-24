@@ -397,7 +397,19 @@ class ServiceOrderPage extends StatelessWidget {
                   'Conectate para recibir el orden del culto.',
             ),
             const SizedBox(height: 16),
-            if (items.isEmpty)
+            if (items.isEmpty && snapshot?.showTitle != null) ...[
+              const _MessageCard(
+                icon: Icons.slideshow_outlined,
+                title: 'Vista simplificada',
+                detail: 'Presenter envió la presentación activa sin el orden completo del culto. Podés controlar sus diapositivas desde aquí.',
+              ),
+              const SizedBox(height: 16),
+              _OutputPreview(snapshot: snapshot),
+              const SizedBox(height: 16),
+              _SlidePosition(snapshot: snapshot),
+              const SizedBox(height: 16),
+              _SlidePicker(connection: connection, snapshot: snapshot),
+            ] else if (items.isEmpty)
               const _MessageCard(
                 icon: Icons.playlist_remove,
                 title: 'Sin culto cargado',
