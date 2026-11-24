@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="lvm_navy">#0B2345</color>
-    <color name="lvm_gold">#D4A853</color>
-    <color name="lvm_neutral">#F4F5F8</color>
+    <color name="lvm_navy">#1C2A39</color>
+    <color name="lvm_gold">#C6A15B</color>
+    <color name="lvm_neutral">#F6F7F9</color>
 </resources>
