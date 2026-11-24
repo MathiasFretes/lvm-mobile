@@ -6,7 +6,8 @@ void main() {
   test('light theme uses navy and gold', () {
     final scheme = LvmTheme.light().colorScheme;
     expect(scheme.primary, LvmColors.navy);
-    expect(scheme.secondary, LvmColors.gold);
+    expect(scheme.secondary, LvmColors.goldText);
+    expect(scheme.onSecondary, Colors.white);
     expect(scheme.surface, LvmColors.neutral);
   });
 
@@ -19,6 +20,8 @@ void main() {
 
   testWidgets('emblem exposes the institutional symbols', (tester) async {
     await tester.pumpWidget(const MaterialApp(home: LvmEmblem()));
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
     expect(
       find.bySemanticsLabel(
         'Emblema de La Voz Misionera: libro abierto, paloma y llama',

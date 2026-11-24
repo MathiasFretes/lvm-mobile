@@ -18,11 +18,19 @@ jobs:
           cache: true
       - run: flutter pub get
       - run: flutter analyze
-      - run: flutter test apps/lvm_public
-      - run: flutter test apps/lvm_service
-      - run: flutter test apps/lvm_worship
-      - run: flutter test apps/lvm_presenter_remote
-      - run: flutter test packages/lvm_design
-      - run: flutter test packages/lvm_models
-      - run: flutter test packages/lvm_api
-      - run: flutter test packages/lvm_persistence
+      - run: flutter test
+        working-directory: apps/lvm_public
+      - run: flutter test
+        working-directory: apps/lvm_service
+      - run: flutter test
+        working-directory: apps/lvm_worship
+      - run: flutter test
+        working-directory: apps/lvm_presenter_remote
+      - run: flutter test
+        working-directory: packages/lvm_design
+      - run: flutter test
+        working-directory: packages/lvm_models
+      - run: flutter test
+        working-directory: packages/lvm_api
+      - run: flutter test
+        working-directory: packages/lvm_persistence
