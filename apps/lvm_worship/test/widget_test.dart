@@ -123,7 +123,13 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(find.text('LVM Worship'), findsWidgets);
-    expect(find.byKey(const Key('lvm-emblem')), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byType(AppBar),
+        matching: find.byKey(const Key('lvm-emblem')),
+      ),
+      findsOneWidget,
+    );
     expect(lvmWorshipBoundariesReady(), isFalse);
     await tester.tap(find.widgetWithText(NavigationDestination, 'Repertorio'));
     await tester.pumpAndSettle();
