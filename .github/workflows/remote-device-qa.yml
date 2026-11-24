@@ -1,0 +1,63 @@
+name: Remote candidate device QA
+
+on:
+  push:
+    branches: [qa/remote-device-57288cf]
+
+permissions:
+  contents: read
+
+jobs:
+  candidate-apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      LVM_QA_SOURCE_SHA: 57288cf0f03a6a962e2bb4b8a11c856c0c7393bd
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.LVM_QA_SOURCE_SHA }}
+      - name: Verify exact source
+        run: |
+          test "$(git rev-parse HEAD)" = "$LVM_QA_SOURCE_SHA"
+          git diff --exit-code
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: '3.47.7'
+          cache: true
+      - run: flutter pub get
+      - run: flutter build apk --debug
+        working-directory: apps/lvm_presenter_remote
+      - name: Record source and checksum
+        env:
+          LVM_QA_BUILDER_SHA: ${{ github.sha }}
+          LVM_QA_RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          python3 - <<'PY'
+          import hashlib, json, os, pathlib, subprocess
+          source = subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip()
+          assert source == os.environ['LVM_QA_SOURCE_SHA']
+          root = pathlib.Path('apps/lvm_presenter_remote/build/app/outputs/flutter-apk')
+          apk = root / 'app-debug.apk'
+          digest = hashlib.sha256(apk.read_bytes()).hexdigest()
+          (root / 'SHA256SUMS').write_text(digest + '  app-debug.apk\n')
+          (root / 'SOURCE.json').write_text(json.dumps({
+              'sourceSha': source, 'builderSha': os.environ['LVM_QA_BUILDER_SHA'],
+              'runUrl': os.environ['LVM_QA_RUN_URL'], 'app': 'lvm_presenter_remote',
+              'flutter': '3.47.7', 'buildMode': 'debug', 'sha256': digest,
+          }, indent=2) + '\n')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: lvm-presenter-remote-57288cf-debug-qa
+          path: |
+            apps/lvm_presenter_remote/build/app/outputs/flutter-apk/app-debug.apk
+            apps/lvm_presenter_remote/build/app/outputs/flutter-apk/SHA256SUMS
+            apps/lvm_presenter_remote/build/app/outputs/flutter-apk/SOURCE.json
+          if-no-files-found: error
+          retention-days: 7
