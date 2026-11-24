@@ -28,9 +28,6 @@ jobs:
         working-directory: apps/lvm_presenter_remote
       - run: flutter test
         working-directory: packages/lvm_design
-      - run: flutter test
-        working-directory: packages/lvm_models
-      - run: flutter test
-        working-directory: packages/lvm_api
-      - run: flutter test
-        working-directory: packages/lvm_persistence
+      - run: flutter test packages/lvm_models
+      - run: flutter test packages/lvm_api
+      - run: flutter test packages/lvm_persistence
