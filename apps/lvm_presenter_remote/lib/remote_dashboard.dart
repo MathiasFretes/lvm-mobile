@@ -394,7 +394,9 @@ class ServiceOrderPage extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               snapshot?.projectTitle ??
-                  'Conectate para recibir el orden del culto.',
+                  (connected
+                      ? 'Presentación activa'
+                      : 'Conectate para recibir el orden del culto.'),
             ),
             const SizedBox(height: 16),
             if (items.isEmpty && snapshot?.showTitle != null) ...[

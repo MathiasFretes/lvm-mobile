@@ -60,7 +60,9 @@ void main() {
     expect(find.text('Sin culto cargado'), findsNothing);
     expect(find.text('Vista simplificada'), findsOneWidget);
     expect(find.text('Canción activa'), findsOneWidget);
-    await tester.tap(find.widgetWithText(ChoiceChip, '2'));
+    final secondSlide = find.widgetWithText(ChoiceChip, '2');
+    await tester.scrollUntilVisible(secondSlide, 250);
+    await tester.tap(secondSlide);
     expect(connection.lastCommand, 'goTo');
     expect(connection.slideIndex, 1);
     expect(connection.itemIndex, isNull);
