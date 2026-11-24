@@ -1,0 +1,9 @@
+{
+  "sourceSha": "57288cf0f03a6a962e2bb4b8a11c856c0c7393bd",
+  "originalSha256": "75d093d77b3381c5c2a327ea5138a91fe9ef95c5311efe13b34d77b76561920e",
+  "installedApkSha256": "44abd210864932dc7aaf728665fe043829a7fec675f00c0afc67eb35ce32ff69",
+  "signerCertificateSha256": "b51045f588af9c7ef1d51113a8ee6cc93809a2b9c7be8f23a98673173e1b0d27",
+  "contentEntriesUnchanged": true,
+  "reason": "Resigned locally with matching existing Android debug certificate; no app source/content changes.",
+  "deviceInstalledSha256": "44abd210864932dc7aaf728665fe043829a7fec675f00c0afc67eb35ce32ff69"
+}

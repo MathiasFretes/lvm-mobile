@@ -1,0 +1,67 @@
+{
+  "project": {
+    "id": "lvm-remote-project-qa",
+    "title": "Culto de prueba"
+  },
+  "items": [
+    {
+      "id": "lvm-remote-culto-qa",
+      "index": 0,
+      "title": "Canto QA",
+      "kind": "song",
+      "slides": [
+        {
+          "id": "slide-1",
+          "index": 0,
+          "label": "Diapositiva 1"
+        },
+        {
+          "id": "slide-2",
+          "index": 1,
+          "label": "Diapositiva 2"
+        },
+        {
+          "id": "slide-3",
+          "index": 2,
+          "label": "Diapositiva 3"
+        },
+        {
+          "id": "slide-4",
+          "index": 3,
+          "label": "Diapositiva 4"
+        },
+        {
+          "id": "slide-5",
+          "index": 4,
+          "label": "Diapositiva 5"
+        }
+      ]
+    },
+    {
+      "id": "lvm-remote-scripture-qa",
+      "index": 1,
+      "title": "Salmo 23",
+      "kind": "scripture",
+      "slides": [
+        {
+          "id": "scripture-slide",
+          "index": 0,
+          "label": "Escritura"
+        }
+      ]
+    }
+  ],
+  "show": {
+    "id": "lvm-remote-culto-qa",
+    "title": "Canto QA"
+  },
+  "current": {
+    "itemIndex": 0,
+    "slideIndex": 3,
+    "slideCount": 5
+  },
+  "output": {
+    "isLive": true,
+    "isCleared": false
+  }
+}

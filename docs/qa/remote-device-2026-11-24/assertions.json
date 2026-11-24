@@ -1,0 +1,9 @@
+{
+  "installedHashVerified": true,
+  "blackoutPreservedAcrossTransportRestartAndPairing": true,
+  "explicitRestore": true,
+  "goToItem": true,
+  "previousNext": true,
+  "manualDisconnectClearsClientState": true,
+  "unpairedCommandRejectedWithoutOutputChange": true
+}
