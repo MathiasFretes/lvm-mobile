@@ -40,3 +40,32 @@ jobs:
             apps/lvm_public/build/app/outputs/flutter-apk/SHA256SUMS
           if-no-files-found: error
           retention-days: 7
+      - name: Record Remote QA APK provenance
+        if: matrix.app == 'lvm_presenter_remote'
+        env:
+          QA_SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          QA_RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          python3 - <<'PY'
+          import hashlib, json, os, pathlib, subprocess
+          root = pathlib.Path('apps/lvm_presenter_remote/build/app/outputs/flutter-apk')
+          digest = hashlib.sha256((root / 'app-debug.apk').read_bytes()).hexdigest()
+          (root / 'SHA256SUMS').write_text(digest + '  app-debug.apk\n')
+          (root / 'SOURCE.json').write_text(json.dumps({
+              'sourceSha': os.environ['QA_SOURCE_SHA'],
+              'checkoutSha': subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip(),
+              'runUrl': os.environ['QA_RUN_URL'], 'sha256': digest,
+              'app': 'lvm_presenter_remote', 'buildMode': 'debug',
+          }, indent=2) + '\n')
+          PY
+      - name: Keep Remote QA APK for physical verification
+        if: matrix.app == 'lvm_presenter_remote'
+        uses: actions/upload-artifact@v4
+        with:
+          name: lvm-presenter-remote-debug-qa
+          path: |
+            apps/lvm_presenter_remote/build/app/outputs/flutter-apk/app-debug.apk
+            apps/lvm_presenter_remote/build/app/outputs/flutter-apk/SHA256SUMS
+            apps/lvm_presenter_remote/build/app/outputs/flutter-apk/SOURCE.json
+          if-no-files-found: error
+          retention-days: 7
