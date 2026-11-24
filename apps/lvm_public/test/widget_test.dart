@@ -73,7 +73,13 @@ void main() {
     await tester.pumpWidget(LvmPublicApp(contentController: controller));
     await tester.pumpAndSettle();
     expect(find.text('La Voz Misionera'), findsWidgets);
-    expect(find.byKey(const Key('lvm-emblem')), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byType(AppBar),
+        matching: find.byKey(const Key('lvm-emblem')),
+      ),
+      findsOneWidget,
+    );
     expect(find.textContaining('Todavía no hay contenido'), findsOneWidget);
     expect(lvmPublicBoundariesReady(), isFalse);
 
