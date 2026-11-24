@@ -105,6 +105,8 @@ class PresenterRemoteConnection extends ChangeNotifier {
   WebSocket? _socket;
   StreamSubscription<dynamic>? _messages;
   String? _sessionToken;
+  int _generation = 0;
+  bool _disposed = false;
 
   PresenterRemoteConnectionStatus status =
       PresenterRemoteConnectionStatus.disconnected;
@@ -112,18 +114,28 @@ class PresenterRemoteConnection extends ChangeNotifier {
   String? errorMessage;
 
   Future<void> connect(PresenterRemotePairingLink link) async {
-    await disconnect(notify: false);
+    if (_disposed) return;
+    final generation = ++_generation;
+    await _closeCurrent();
+    if (_disposed || generation != _generation) return;
     status = PresenterRemoteConnectionStatus.connecting;
     errorMessage = null;
     notifyListeners();
     try {
       final socket = await WebSocket.connect(link.socketUri.toString())
           .timeout(const Duration(seconds: 8));
+      if (_disposed || generation != _generation) {
+        await socket.close();
+        return;
+      }
       _socket = socket;
       _messages = socket.listen(
-        _receive,
+        (raw) {
+          if (!_disposed && generation == _generation) _receive(raw);
+        },
         onDone: () {
-          if (status != PresenterRemoteConnectionStatus.disconnected &&
+          if (!_disposed && generation == _generation &&
+              status != PresenterRemoteConnectionStatus.disconnected &&
               status != PresenterRemoteConnectionStatus.error) {
             _socket = null;
             _sessionToken = null;
@@ -132,7 +144,11 @@ class PresenterRemoteConnection extends ChangeNotifier {
             notifyListeners();
           }
         },
-        onError: (Object error) => _fail('La conexión se interrumpió.'),
+        onError: (Object error) {
+          if (!_disposed && generation == _generation) {
+            _fail('La conexión se interrumpió.');
+          }
+        },
       );
       _send({
         'type': 'pair.request',
@@ -141,6 +157,7 @@ class PresenterRemoteConnection extends ChangeNotifier {
         'device': {'id': _deviceId, 'name': _deviceName},
       });
     } on Object {
+      if (_disposed || generation != _generation) return;
       _fail(
         'No se pudo conectar con LVM Presenter. El QR puede haber vencido o pertenecer a otra red. En Presenter, activá Control remoto local y generá un QR nuevo.',
       );
@@ -166,16 +183,25 @@ class PresenterRemoteConnection extends ChangeNotifier {
     });
   }
 
-  Future<void> disconnect({bool notify = true}) async {
-    await _messages?.cancel();
+  Future<void> _closeCurrent() async {
+    // Detach synchronously: an older cleanup must never close a newer socket.
+    final messages = _messages;
+    final socket = _socket;
     _messages = null;
-    await _socket?.close();
     _socket = null;
     _sessionToken = null;
     snapshot = null;
+    await messages?.cancel();
+    await socket?.close();
+  }
+
+  Future<void> disconnect({bool notify = true}) async {
+    ++_generation;
+    final closing = _closeCurrent();
     status = PresenterRemoteConnectionStatus.disconnected;
     errorMessage = null;
-    if (notify) notifyListeners();
+    if (notify && !_disposed) notifyListeners();
+    await closing;
   }
 
   void _receive(dynamic raw) {
@@ -240,7 +266,9 @@ class PresenterRemoteConnection extends ChangeNotifier {
 
   @override
   void dispose() {
-    unawaited(disconnect(notify: false));
+    _disposed = true;
+    ++_generation;
+    unawaited(_closeCurrent());
     super.dispose();
   }
 }

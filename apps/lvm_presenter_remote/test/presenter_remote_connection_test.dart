@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -6,6 +7,51 @@ import 'package:lvm_models/lvm_models.dart';
 import 'package:lvm_presenter_remote/presenter_remote_connection.dart';
 
 void main() {
+  for (final disposeWhileConnecting in [false, true]) {
+    test('late handshake cannot restore connection after ${disposeWhileConnecting ? "dispose" : "disconnect"}', () async {
+      final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+      final requested = Completer<HttpRequest>();
+      final subscription = server.listen((request) => requested.complete(request));
+      final connection = PresenterRemoteConnection(deviceName: 'Delayed QA');
+      WebSocket? peer;
+      var disposed = false;
+      addTearDown(() async {
+        if (!disposed) connection.dispose();
+        await peer?.close();
+        await subscription.cancel();
+        await server.close(force: true);
+      });
+      var notifications = 0;
+      connection.addListener(() => notifications++);
+      final connecting = connection.connect(PresenterRemotePairingLink(
+        host: InternetAddress.loopbackIPv4.address, port: server.port,
+        pairingId: 'delayed-pairing', pairingSecret: 'delayed-secret',
+      ));
+      final request = await requested.future.timeout(const Duration(seconds: 3));
+      if (disposeWhileConnecting) {
+        connection.dispose();
+        disposed = true;
+      } else {
+        await connection.disconnect();
+      }
+      final afterCancel = notifications;
+      peer = await WebSocketTransformer.upgrade(request);
+      final messages = <String>[];
+      final completed = Completer<void>();
+      peer!.listen((raw) {
+        messages.add(raw as String);
+        peer!.add(jsonEncode({'schemaVersion':'0.1', 'type':'pair.approved', 'sessionToken':'stale-session'}));
+      }, onDone: () => completed.complete());
+      await connecting;
+      // A stale handshake must be closed, with no pairing or auth notification.
+      await completed.future.timeout(const Duration(seconds: 3));
+      expect(messages, isEmpty);
+      expect(notifications, afterCancel);
+      expect(connection.snapshot, isNull);
+      if (!disposed) expect(connection.status, PresenterRemoteConnectionStatus.disconnected);
+    });
+  }
+
   test('used pairing link asks for a new QR', () async {
     final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
     final connection = PresenterRemoteConnection(deviceName: 'QA phone');
