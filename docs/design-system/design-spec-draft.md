@@ -1,5 +1,18 @@
 # Especificación visual compartida — borrador
 
+## Actualización de alcance — 24 de noviembre de 2026
+
+Las secciones siguientes son una propuesta histórica basada en e95a131; sus colores, tipografía, disponibilidad del logo y cantidad de destinos no deben interpretarse como descripción del candidato actual.
+
+La identidad aprobada e implementada se revisa en [PR #18](https://github.com/MathiasFretes/lvm-mobile/pull/18), SHA f4f1c157806f19aa9255d3ec8b4284a41e72d0de. Su referencia es `docs/brand/IDENTITY.md`, `docs/brand/identity.tokens.json` y los componentes de `lvm_design`, no este borrador histórico.
+
+- Emblema oficial blanco sobre círculo dorado vertical; original institucional aportado por el usuario. El bloqueo de assets ya no aplica.
+- Navy #1C2A39, gold #C6A15B, neutral #F6F7F9 y navy profundo #0D1624. Texto dorado sobre blanco #825C18; etiquetas de acciones mantienen contraste por rol.
+- Componente compacto: emblema 40, gap 12, nombre 15 y producto 12. Poppins ya está incorporada en Flutter con su licencia en el árbol actual. Expo conserva la tipografía nativa.
+- La prueba de #18 cubre identidad a 320 px con texto del sistema al 200%; no certifica todos los controles ni resuelve automáticamente los hallazgos de #9.
+
+La persistencia del tema, mensajes de contrato, textos de inicio y componentes generales propuestos más abajo deben revisarse contra el código actual antes de abrir trabajo nuevo. Este PR no implementa esas funciones y no declara cerrado el issue #9. La integración del documento y de #18 requiere revisión; no autoriza merge ni publicación.
+
 Estado: propuesta de M14A.2.1. No implementa componentes ni cambia pantallas.
 Baseline: `origin/main` `e95a131ae3bcacbd091bce3bed07760e8dc131c8`.
 
