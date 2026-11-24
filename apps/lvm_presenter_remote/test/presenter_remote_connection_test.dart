@@ -38,7 +38,7 @@ void main() {
       peer = await WebSocketTransformer.upgrade(request);
       final messages = <String>[];
       final completed = Completer<void>();
-      peer!.listen((raw) {
+      peer.listen((raw) {
         messages.add(raw as String);
         peer!.add(jsonEncode({'schemaVersion':'0.1', 'type':'pair.approved', 'sessionToken':'stale-session'}));
       }, onDone: () => completed.complete());
