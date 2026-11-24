@@ -31,8 +31,8 @@ abstract final class LvmTheme {
         ).copyWith(
           primary: LvmColors.navy,
           onPrimary: Colors.white,
-          secondary: LvmColors.gold,
-          onSecondary: LvmColors.navy,
+          secondary: LvmColors.goldText,
+          onSecondary: Colors.white,
           surface: LvmColors.neutral,
           onSurface: LvmColors.navy,
         );

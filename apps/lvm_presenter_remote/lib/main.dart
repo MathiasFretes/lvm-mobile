@@ -110,11 +110,8 @@ class _PresenterRemoteShellState extends State<_PresenterRemoteShell> {
 
     return Scaffold(
       appBar: AppBar(
-        leading: const Padding(
-          padding: EdgeInsets.all(8),
-          child: LvmEmblem(size: 36),
-        ),
-        title: Text('LVM · ${_titles[_index]}'),
+        toolbarHeight: 56.0 * MediaQuery.textScalerOf(context).scale(1).clamp(1.0, 2.0),
+        title: LvmBrandIdentity(product: 'Presenter Remote · ${_titles[_index]}'),
       ),
       body: IndexedStack(index: _index, children: pages),
       bottomNavigationBar: NavigationBar(

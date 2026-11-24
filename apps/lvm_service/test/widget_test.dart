@@ -65,7 +65,13 @@ void main() {
     await tester.pumpWidget(LvmServiceApp(previewController: controller));
     await tester.pumpAndSettle();
     expect(find.text('LVM Service'), findsWidgets);
-    expect(find.byKey(const Key('lvm-emblem')), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byType(AppBar),
+        matching: find.byKey(const Key('lvm-emblem')),
+      ),
+      findsOneWidget,
+    );
     expect(lvmServiceBoundariesReady(), isFalse);
     await tester.tap(find.widgetWithText(NavigationDestination, 'Cultos'));
     await tester.pumpAndSettle();
