@@ -1,5 +1,17 @@
 # Auditoría de identidad institucional
 
+## Actualización de trazabilidad — 24 de noviembre de 2026
+
+Este documento conserva el inventario histórico del baseline e95a131. Sus afirmaciones de ausencia de assets describen esa fecha, no el estado actual.
+
+**El bloqueo por falta de maestro quedó superado.** El usuario entregó los originales institucionales PDF/AI y aprobó el símbolo blanco, con libro, llama y paloma en negativo, sobre círculo dorado con degradado oscuro arriba y claro abajo (#B28A3D → #D5B36A → #EFDEB3). La propuesta histórica de círculo navy fue sustituida expresamente por esa decisión.
+
+La implementación candidata está en [PR #18](https://github.com/MathiasFretes/lvm-mobile/pull/18), SHA f4f1c157806f19aa9255d3ec8b4284a41e72d0de. Los maestros, procedencia, variantes, límites y tokens se documentan en `docs/brand/IDENTITY.md` e `identity.tokens.json` de esa rama. El emblema usa el asset derivado del original; no vuelve a dibujarse con un painter provisional.
+
+El CI de #18 verifica análisis, pruebas y cuatro APK. Aún falta comprobar físicamente el launcher y arranque de esta variante final: la prueba anterior del HONOR correspondía al candidato azul. No se declara aquí aprobado ese gate ni una distribución.
+
+Este PR sigue siendo exclusivamente documental; no modifica los assets ni sustituye la revisión de #18. El inventario siguiente se mantiene como evidencia histórica. Las observaciones de #9 sobre contenido y controles se evalúan por separado.
+
 Estado: borrador de M14A.2.1. No sustituye assets. No aprueba un logo.
 
 Baseline: `origin/main` `e95a131ae3bcacbd091bce3bed07760e8dc131c8`.
