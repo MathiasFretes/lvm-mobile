@@ -1,0 +1,28 @@
+{
+  "sourceSha": "f4f1c157806f19aa9255d3ec8b4284a41e72d0de",
+  "originalSha256": "2c940acc6bcf475b4558749c5060c3d546e8f2b7e14ad74f828e79f830999786",
+  "installedCandidateSha256": "0588a299358fd7333e0c6ea26c33e614802e3256b3a956c2fa959861367054b9",
+  "signerCertificateSha256": "b51045f588af9c7ef1d51113a8ee6cc93809a2b9c7be8f23a98673173e1b0d27",
+  "contentUnchanged": true,
+  "device": "HONOR ELP-NX9 / Android 16",
+  "deviceInstalledSha256": "0588a299358fd7333e0c6ea26c33e614802e3256b3a956c2fa959861367054b9",
+  "physicalQA": {
+    "launcherTapOpenedApp": true,
+    "coldStart": true,
+    "tabs": [
+      "Control",
+      "Culto",
+      "Biblia",
+      "Canciones",
+      "Más"
+    ],
+    "themes": [
+      "Claro",
+      "Oscuro",
+      "Automático"
+    ],
+    "originalAutomaticPreferenceRestored": true,
+    "scope": "branding and local navigation only; no new QR/projection/session integration test",
+    "homeScreenshotPrivate": "kept local; do not publish personal wallpaper"
+  }
+}
